@@ -12,13 +12,33 @@ function initMap() {
         var address = $('#address').val();
         geocodeAddress(geocoder, map, address);
 
-        socket.emit('scrapeWikiAddress', {address});
+        socket.emit('scrapeWikiAddress', { address });
 
     });
 }
 
-socket.on('returnScrapeData', function(data) {
-    console.log(data.capital);
+socket.on('returnScrapeData', function (data) {
+   
+    var arrayIndex = $.map(data, function (value, index) {
+        return [index];
+    });
+    var array = $.map(data, function (value, index) {
+        return [value];
+    });
+    var list = $("#names-list");
+    list.empty();
+    var parent = list.parent();
+   
+    list.each(function (i) {
+        console.log(data.length);
+        for (var x = 0; x < array.length; x++) {
+            console.log(array[x]);
+            $(this).append('<li>' + '<strong>' + arrayIndex[x] +'</strong>'+ ': ' + array[x] + '</li>');
+            if (x == array.length - 1) {
+                $(this).appendTo(parent);
+            }
+        }
+    });
 });
 
 function geocodeAddress(geocoder, resultsMap, address) {
