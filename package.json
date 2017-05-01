@@ -15,8 +15,9 @@
   "dependencies": {
     "axios": "^0.16.1",
     "express": "^4.15.2",
+    "fb": "^2.0.0",
+    "fbgraph": "^1.4.1",
     "fs": "0.0.1-security",
-    "geocoder": "^0.2.3",
     "http": "0.0.0",
     "node-geocoder": "^3.16.0",
     "nodemon": "^1.11.0",
