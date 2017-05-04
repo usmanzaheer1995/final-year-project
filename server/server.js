@@ -19,7 +19,7 @@ var server = http.createServer(app);
 var io = socketIO(server);
 
 app.use(express.static(publicPath));
-
+//console.log(port);
 
 io.on(`connection`, (socket) => {
 
