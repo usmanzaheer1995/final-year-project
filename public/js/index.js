@@ -17,10 +17,44 @@ function initMap() {
 
         address = $('#select1').val();
         geocodeAddress(address);
+        //getCurrentLocation();
         socket.emit('scrapeWiki', { address });
+        socket.emit('myEvents', { address });
+        socket.emit('meetup', { address });
 
     });
 
+}
+
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        console.log('here');
+        navigator.geolocation.getCurrentPosition(showPosition);
+    }
+    else {
+        console.log('error');
+    }
+}
+function showPosition(position) {
+    // x.innerHTML = "Latitude: " + position.coords.latitude +
+    //    "<br>Longitude: " + position.coords.longitude;
+    console.log(position.coords.latitude, position.coords.longitude);
+
+    var latLng = { lat: position.coords.latitude, lng: position.coords.longitude };
+    map.setCenter(latLng);
+    var marker = new google.maps.Marker({
+        map: map,
+        position: latLng
+    });
+    marker.infowindow = new google.maps.InfoWindow({
+        content: 'current Location',
+        // map: map
+    });
+
+    google.maps.event.addListener(marker, 'click', function () {
+        this.infowindow.open(map, this);
+    });
+    // markers.push(marker);
 }
 
 function showWikiDetails(arrayIndex, array) {
@@ -41,7 +75,7 @@ function showWikiDetails(arrayIndex, array) {
 }
 
 socket.on('returnWikiData', function (data) {
-
+    //console.log('wiki data');
     var arrayIndex = $.map(data, function (value, index) {
         return [index];
     });
@@ -49,8 +83,8 @@ socket.on('returnWikiData', function (data) {
         return [value];
     });
 
-    showWikiDetails(arrayIndex,array);
-    
+    showWikiDetails(arrayIndex, array);
+
 });
 
 function setMapOnAll(map) {
@@ -69,15 +103,14 @@ function deleteMarkers() {
 }
 
 socket.on('eventsData', function (data) {
-    //console.log(data.location);
-
+    console.log(data.latlng);
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     var flag = false;
     for (var i = 0; i < locations.length; ++i) {
         if (locations[i] === data.location) {
-            console.log(markers[i].infowindow.content);
-            markers[i].infowindow.setContent(markers[i].infowindow.content + '<li>' + data.name + '</li>');
+            //console.log(markers[i].infowindow.content);
+            markers[i].infowindow.setContent(markers[i].infowindow.content + '<li>' + '<a target = "_blank" href = "' + data.details + '">' + data.name + '</a>' + '</li>');
             flag = true;
 
         }
@@ -94,18 +127,18 @@ socket.on('eventsData', function (data) {
 
         marker.infowindow = new google.maps.InfoWindow({
             //content: '<li>' + data.name + " " + '</li>'
-            content: '<a target = "_blank" href = "'+data.details+'">'+data.name+ '</a>'
+            content: '<li>' + '<a target = "_blank" href = "' + data.details + '">' + data.name + '</a>' + '</li>'
         });
 
         markers.push(marker);
         locations.push(data.location);
 
-        google.maps.event.addListener(marker, 'click', function () {
+        google.maps.event.addListener(marker, 'mouseover', function () {
             this.infowindow.open(map, this);
         });
-        /*google.maps.event.addListener(marker, 'mouseout', function () {
+        google.maps.event.addListener(marker, 'click', function () {
             this.infowindow.close();
-        })*/
+        });
 
 
     }
@@ -113,8 +146,8 @@ socket.on('eventsData', function (data) {
     // for (var index = 0; index < locations.length; index++) {
     //     console.log(locations[index]);
     // }
-    console.log(markers.length);
-    console.log('\n\n');
+    //console.log(markers.length);
+    //console.log('\n\n');
 
     //markers[0].infowindow.setContent('islamabad' + '<li>' + markers[0].infowindow.content + '</li>');
     //console.log(markers[0].infowindow.content);
@@ -154,12 +187,12 @@ function geocodeAddress(address) {
             markers.push(marker);
             locations.push(address);
             //  infowindow.open(map, marker);
-            google.maps.event.addListener(marker, 'click', function () {
+            google.maps.event.addListener(marker, 'mouseover', function () {
                 this.infowindow.open(map, this);
             });
-            // google.maps.event.addListener(marker, 'mouseout', function () {
-            //     this.infowindow.close();
-            // });
+            google.maps.event.addListener(marker, 'click', function () {
+                this.infowindow.close();
+            });
 
             //infowindowArray.push(infowindow);
             //myfunc();

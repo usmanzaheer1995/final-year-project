@@ -9,6 +9,9 @@ const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
 var NodeGeocoder = require('node-geocoder');
 var { meetup } = require('./utils/meetup');
+var striptags = require('striptags');
+var cheerio = require('cheerio'); // Basically jQuery for node.js 
+
 var app = express();
 
 var server = http.createServer(app);
@@ -16,62 +19,60 @@ var io = socketIO(server);
 
 app.use(express.static(publicPath));
 
-var meetupScrape = () => {
-
-};
 
 io.on(`connection`, (socket) => {
 
     console.log('new user connection');
 
     socket.on('scrapeWiki', (address) => {
-
-        var detailsArray = [];
-        var json = {};
-        var eventName = "name", eventLocation = "location", eventTime = "time", eventLatLng = "latlng", eventDetails = "details";
-
-
-
-        var cheerio = require('cheerio'); // Basically jQuery for node.js 
+       
 
         console.log('scraping wiki');
 
         var addr = address.address;
         var newAddress = encodeURI(addr);
 
-        var options = {
+        let options3 = {
             uri: `https://en.wikipedia.org/wiki/${newAddress}`,
             transform: function (body) {
                 return cheerio.load(body);
             }
         };
         // console.log(options.uri);
-        rp(options)
+        rp(options3)
             .then(function ($) {
                 // Process html like you would with jQuery... 
-                var json = {};
+                console.log('WIKI');
+                var json1 = {};
 
                 $("table.vcard tr").each(function (tr_index, tr) {
                     var th_text = $(this).find("th").text();
                     var prop_name = th_text.trim().toLowerCase().replace(/[^a-z]/g, " ");
 
-                    json[prop_name] = $(this).find("td").text();
+                    json1[prop_name] = $(this).find("td").text();
 
                     // if ({ "capital": 1 }[prop_name]) {
                     //     //console.log('Capital: ');
                     //     capital = $(this).find("td").text();
                 });
                 // console.log('scrapping done');
-                socket.emit('returnWikiData', json);
+                socket.emit('returnWikiData', json1);
             })
             .catch(function (err) {
                 // Crawling failed or Cheerio choked... 
             });
 
+    });
 
+    socket.on('myEvents', (address) => {
+        var detailsArray = [];
+        var json = {};
+        var eventName = "name", eventLocation = "location", eventTime = "time", eventLatLng = "latlng", eventDetails = "details";
 
+        var addr = address.address;
+        var newAddress = encodeURI(addr);
 
-        options = {
+        var options = {
             uri: `http://www.myevents.pk/event_loc/${newAddress}-events/`,
             transform: function (body) {
                 return cheerio.load(body);
@@ -132,66 +133,80 @@ io.on(`connection`, (socket) => {
 
                         }
                     }).then(() => {
-                        console.log('meetup')
-                        var addressCoordinates;
-                        var options1 = {
-                            provider: 'google',
-
-                            // Optional depending on the providers 
-                            httpAdapter: 'https', // Default 
-                            apiKey: 'AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ', // for Mapquest, OpenCage, Google Premier 
-                            formatter: null         // 'gpx', 'string', ... 
-                        };
-                        var geocoder = NodeGeocoder(options1);
-
-                        geocoder.geocode(address.address).then(function (res) {
-
-                            var lat = res[0].latitude;
-                            var lng = res[0].longitude;
-                            addressCoordinates = { lat: lat, lng: lng };
-
-                        }).then(() => {
-                            //console.log('hello');
-                            meetup().get({
-                                //topic: 'photo',
-                                //city: 'nyc',
-                                lat: String(addressCoordinates.lat),
-                                lon: String(addressCoordinates.lng),
-                            }, function (results) {
-                                //console.log(results);
-                                var meetupList = meetup().parseEvents(results);
-                                for (var i = 0; i < meetupList.length; ++i) {
-                                    var lat = meetupList[i].latitude;
-                                    var lng = meetupList[i].longitude;
-                                    json[eventLatLng] = { lat: lat, lng: lng };
-
-                                    json[eventName] = meetupList[i].name;
-                                    json[eventLocation] = meetupList[i].city;
-                                    console.log(json[eventName]);
-                                }
-                                // console.log(JSON.stringify(meetupList, undefined, 2));
-                            });
-                        });
-                    }).then(() => {
-                        console.log(json[eventName]);
+                        // console.log(json[eventName]);
                         socket.emit("eventsData", json);
                         // console.log(name + " emitted");
                     })
                         .catch(function (err) {
                             console.log(err);
                         });
-
                 });
-
-            })
-            .catch(function (err) {
-                // Crawling failed or Cheerio choked... 
             });
+    });
+    socket.on('meetup', (address) => {
+         var thisFlag = true;
+        var detailsArray = [];
+        var json = {};
+        var eventName = "name", eventLocation = "location", eventTime = "time", eventLatLng = "latlng", eventDetails = "details";
 
+        //console.log('meetup')
+        var addressCoordinates;
+        var options1 = {
+            provider: 'google',
+
+            // Optional depending on the providers 
+            httpAdapter: 'https', // Default 
+            apiKey: 'AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ', // for Mapquest, OpenCage, Google Premier 
+            formatter: null         // 'gpx', 'string', ... 
+        };
+        var geocoder = NodeGeocoder(options1);
+
+        geocoder.geocode(address.address).then(function (res) {
+
+            var lat = res[0].latitude;
+            var lng = res[0].longitude;
+            addressCoordinates = { lat: lat, lng: lng };
+
+        }).then(() => {
+            //console.log('hello');
+            meetup().get({
+                //topic: 'photo',
+                //city: 'nyc',
+                lat: String(addressCoordinates.lat),
+                lon: String(addressCoordinates.lng),
+            }, function (results) {
+                //console.log(results);
+
+                if (thisFlag === true) {
+                    console.log('meetup');
+                    var meetupList = meetup().parseEvents(results);
+                    for (var i = 0; i < results.length; ++i) {
+                        if (results[i].venue) {
+                            var lat = results[i].venue.lat;
+                            var lng = results[i].venue.lon;
+                            json[eventLatLng] = { lat: lat, lng: lng };
+                            json[eventLocation] = results[i].venue.name + ', ' + results[i].venue.address_1 + ', ' + results[i].venue.city;
+                        }
+                        json[eventName] = results[i].name;
+
+                        json['description'] = striptags(results[i].description);
+                        json[eventDetails] = results[i].event_url;
+
+                        //console.log(json[eventDetails]);
+
+                        socket.emit('eventsData', json);
+                        thisFlag = false;
+                    }
+                }
+                // console.log(JSON.stringify(meetupList, undefined, 2));
+            });
+        });//.then(() => {
+        //     console.log(json);
+        // });
     });
 
-});
 
-server.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
 });
+    server.listen(port, () => {
+        console.log(`Server listening on port ${port}`);
+    });

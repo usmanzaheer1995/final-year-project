@@ -3,54 +3,80 @@ const axios = require('axios');
 var NodeGeocoder = require('node-geocoder');
 var cheerio = require('cheerio'); // Basically jQuery for node.js 
 
+var striptags = require('striptags');
+
 var fs = require('fs');
 var request = require('request');
 
 var { meetup } = require('../server/utils/meetup');
 
-var addressCoordinates;
-var options1 = {
-  provider: 'google',
+var Twit = require('twit');
 
-  // Optional depending on the providers 
-  httpAdapter: 'https', // Default 
-  apiKey: 'AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ', // for Mapquest, OpenCage, Google Premier 
-  formatter: null         // 'gpx', 'string', ... 
-};
-var geocoder = NodeGeocoder(options1);
+// var T = new Twit({
+//     consumer_key:         'waitH5Em0J6Iu2hVfl2UYOtgN',
+//     consumer_secret:      'E1Dn5NCIWGvMgAEzOfGqbiUQM413wZmXhsAY6QJrMK8VOyPpg6',
+//     access_token:         '528168895-MCeFfvkuTWurJzArNiuDdQWIqkrCZJ4cIoiFTJ6V',
+//     access_token_secret:  'vSwlWjwFeI20CXHUOQRl06JetZ9W0Fx1SRtQ8apsrMPAb',
+//     timeout_ms:           60*1000,  // optional HTTP request timeout to apply to all requests.
+// });
 
-geocoder.geocode('islamabad').then(function (res) {
+// T.get('search/tweets', { q: '#event since:2017-05-01', count: 100 }, function(err, data, response) {
+//     var arr=data.statuses;
+//     //console.log(arr);
+//     for(var i=0;i<arr.length;i++) {
+//         console.log(arr[i].text);
+//         console.log(arr[i].user.location);
+//     }
+// });
 
-  var lat = res[0].latitude;
-  var lng = res[0].longitude;
-  addressCoordinates = { lat: lat, lng: lng };
 
-  var obj = addressCoordinates.lat;
-  //console.log(String(addressCoordinates.lat));
-  //console.log();
+// var addressCoordinates;
+// var options1 = {
+//   provider: 'google',
 
-}).then(() => {
-  //console.log(addressCoordinates.lat, addressCoordinates.lng);
-  meetup().get({
-    //topic: 'photo',
-    //city: 'nyc',
-    lat: String(addressCoordinates.lat),
-    lon: String(addressCoordinates.lng),
-  }, function (results) {
-    //console.log(results.length);
-    var meetupList = meetup().parseEvents(results);
-    for (var i = 0; i < meetupList.length; ++i) {
-      var lat = meetupList[i].latitude;
-      var lng = meetupList[i].longitude;
-      // json[eventLatLng] = { lat: lat, lng: lng };
+//   // Optional depending on the providers 
+//   httpAdapter: 'https', // Default 
+//   apiKey: 'AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ', // for Mapquest, OpenCage, Google Premier 
+//   formatter: null         // 'gpx', 'string', ... 
+// };
+// var geocoder = NodeGeocoder(options1);
 
-      //  json[eventName] = meetupList[i].name;
-      // json[eventLocation] = meetupList[i].city;
-      console.log(meetupList[i].name);
-    }
-    // console.log(JSON.stringify(meetupList, undefined, 2));
-  });
-});
+// geocoder.geocode('islamabad').then(function (res) {
+
+//   var lat = res[0].latitude;
+//   var lng = res[0].longitude;
+//   addressCoordinates = { lat: lat, lng: lng };
+
+//   var obj = addressCoordinates.lat;
+//   //console.log(String(addressCoordinates.lat));
+//   //console.log();
+
+// }).then(() => {
+//   //console.log(addressCoordinates.lat, addressCoordinates.lng);
+//   meetup().get({
+//     //topic: 'photo',
+//     //city: 'nyc',
+//     lat: String(addressCoordinates.lat),
+//     lon: String(addressCoordinates.lng),
+//   }, function (results) {
+//      //var desc = results[0].event_url || '';
+//     // var parsed = '';
+//     //  if ( desc ) parsed += 'Description: ' + desc + '\n';
+//     //console.log(desc);
+//     var meetupList = meetup().parseEvents(results);
+//     for (var i = 0; i < results.length; ++i) {
+//       var lat = results[i].venue.lat;
+//       var lng = results[i].venue.lon;
+//       // json[eventLatLng] = { lat: lat, lng: lng };
+//       let location = results[i].venue.name + ', ' + results[i].venue.address_1 + ', ' + results[i].venue.city;
+//       //  json[eventName] = meetupList[i].name;
+//       // json[eventLocation] = meetupList[i].city;
+//       // console.log(striptags(results[i].description));
+//       console.log(results[i].event_url);
+//     }
+//     //console.log(JSON.stringify(meetupList, undefined, 2));
+//   });
+// });
 
 
 // meetup().get({
@@ -62,11 +88,11 @@ geocoder.geocode('islamabad').then(function (res) {
 // }, function (results) {
 
 //   var meetupList = meetup().parseEvents(results);
-//   for(var i = 0; i< meetupList.length; ++i) {
-//     var lat = meetupList[i].latitude;
-//     console.log(lat);
-//   }
-//  // console.log(JSON.stringify(meetupList, undefined, 2));
+//   // for(var i = 0; i< meetupList.length; ++i) {
+//   //   var lat = meetupList[i].description;
+//   //   //console.log(lat);
+//   // }
+//   console.log(JSON.stringify(meetupList, undefined, 2));
 // });
 
 // var meetup = function() {
@@ -109,6 +135,7 @@ geocoder.geocode('islamabad').then(function (res) {
 //      * A simple function that converts JSON to 
 //      * string in a pretty way
 //     **/
+//     console.log(mEvent['desc'])
 //     var name = mEvent['name'] || '';
 //     var desc = mEvent['desc'] || '';
 //     var url = mEvent['url'] || '';
@@ -250,101 +277,23 @@ meetup().get({
 //         console.log(e.message);
 //     }
 // });
-
 // var options = {
-//     uri: 'http://www.myevents.pk/event_loc/islamabad-events/',
-//     transform: function (body) {
-//         return cheerio.load(body);
-//     }
+//   uri: `http://www.myevents.pk/event/pieas-national-olympiad-pion17/`,
+//   transform: function (body) {
+//     return cheerio.load(body);
+//   }
 // };
-// var optionsURI = options.uri;
+// // console.log(options.uri);
 // rp(options)
-//     .then(function ($) {
-//         // Process html like you would with jQuery... 
+//   .then(function ($) {
+//     // Process html like you would with jQuery... 
+//     //console.log('WIKI');
+//     var json = {};
 
-//         $('#cat-listing-holder .listing-container').each(function () {
-//             var location = ($(this).find('.listing-container-block-title .listing-container-tagline').clone().children().remove().end().text().replace(/\s+/g, ' '));
-//             // console.log($(this).find('.listing-container-block-title').children('span').text().replace(/\s+/g, ' '));
-//             // console.log($(this).find('.listing-container-rating').find('span').text() + "\n");
-//             var name = ($(this).find('.listing-container-block-title').children('a').text());
-//             var link = $(this).find('.listing-container-big-button').attr('href');
-//             console.log(link);
-//             var eventDetails;
-//             options.uri = link;
-//             rp(options)
-//                 .then(($) => {
-//                     eventDetails = $('.item-block-content').children('p').eq(1).text();
-
-//                 }).then(() => {
-//                     options.uri = optionsURI;
-//                     var options1 = {
-//                         provider: 'google',
-
-//                         // Optional depending on the providers 
-//                         httpAdapter: 'https', // Default 
-//                         apiKey: 'AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ', // for Mapquest, OpenCage, Google Premier 
-//                         formatter: null         // 'gpx', 'string', ... 
-//                     };
-//                     var geocoder = NodeGeocoder(options1);
-
-//                     // Using callback 
-//                     geocoder.geocode(location).then(function (res) {
-//                         if (res[0]) {
-//                             console.log(location);
-//                             console.log(name);
-//                             console.log(eventDetails);
-//                             // json[eventLocation] = res[0].formattedAddress;
-//                             // json[eventName] = name;
-//                             // json[eventTime] = time;
-
-//                             // var lat = res[0].latitude;
-//                             // var lng = res[0].longitude;
-//                             // json[eventLatLng] = { lat: lat, lng: lng };
-
-
-//                             //console.log(res[0].formattedAddress);
-//                             // console.log(json[eventLocation]);
-//                         }
-//                     });
-//                 })
-
-
-//                 .catch(function (err) {
-//                     // Crawling failed or Cheerio choked... 
-//                 });
-
-//             // var options = {
-//             //     provider: 'google',
-
-//             //     // Optional depending on the providers 
-//             //     httpAdapter: 'https', // Default 
-//             //     apiKey: 'AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ', // for Mapquest, OpenCage, Google Premier 
-//             //     formatter: null         // 'gpx', 'string', ... 
-//             // };
-//             // var geocoder = NodeGeocoder(options);
-
-//             // // Using callback 
-//             // geocoder.geocode(location).then(function (res) {
-//             //     if (res[0]) {
-//             //         console.log(location);
-//             //         console.log(name);
-//             //         // json[eventLocation] = res[0].formattedAddress;
-//             //         // json[eventName] = name;
-//             //         // json[eventTime] = time;
-
-//             //         // var lat = res[0].latitude;
-//             //         // var lng = res[0].longitude;
-//             //         // json[eventLatLng] = { lat: lat, lng: lng };
-
-
-//             //         //console.log(res[0].formattedAddress);
-//             //         // console.log(json[eventLocation]);
-//             //     }
-//             // });
-//         });
-
-
-//     })
-//     .catch(function (err) {
-//         // Crawling failed or Cheerio choked... 
-//     });
+//     console.log($('.item-block-content').find('p').eq(1).text());
+//     // console.log('scrapping done');
+//     //socket.emit('returnWikiData', json);
+//   })
+//   .catch(function (err) {
+//     // Crawling failed or Cheerio choked... 
+//   });
