@@ -3,6 +3,7 @@ const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
 const rp = require('request-promise');
+const request = require('request');
 const axios = require('axios');
 
 const publicPath = path.join(__dirname, '../public');
@@ -25,7 +26,7 @@ io.on(`connection`, (socket) => {
     console.log('new user connection');
 
     socket.on('scrapeWiki', (address) => {
-       
+
 
         console.log('scraping wiki');
 
@@ -126,13 +127,23 @@ io.on(`connection`, (socket) => {
                             var lng = res[0].longitude;
                             json[eventLatLng] = { lat: lat, lng: lng };
 
-                            detailsArray.push(details);
-                            //console.log(json[eventName]);
+                            detailsArray.push(json[eventDetails]);
+                            //console.log('hi');
                             // console.log(json[eventName]);
                             // console.log("--------------")
 
                         }
-                    }).then(() => {
+                     })//.then(() => {
+                    //     //let i = 0;
+                        
+                    //     request(json[eventDetails], function (error, response, html) {
+                    //         if (!error && response.statusCode == 200) {
+                    //             var $ = cheerio.load(html);
+                    //             console.log(json[eventDetails]);
+                    //             console.log($('.item-block-content').find('p').eq(1).text());
+                    //         }
+                    //     });
+                    /*})*/.then(() => {
                         // console.log(json[eventName]);
                         socket.emit("eventsData", json);
                         // console.log(name + " emitted");
@@ -144,8 +155,8 @@ io.on(`connection`, (socket) => {
             });
     });
     socket.on('meetup', (address) => {
-         var thisFlag = true;
-        var detailsArray = [];
+        var thisFlag = true;
+        //var detailsArray = [];
         var json = {};
         var eventName = "name", eventLocation = "location", eventTime = "time", eventLatLng = "latlng", eventDetails = "details";
 
@@ -207,6 +218,6 @@ io.on(`connection`, (socket) => {
 
 
 });
-    server.listen(port, () => {
-        console.log(`Server listening on port ${port}`);
-    });
+server.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+});
