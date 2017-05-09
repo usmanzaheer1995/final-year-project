@@ -5,6 +5,7 @@ var locations = [];
 var infowindowArray = [];
 var markers = [];
 var address;
+var inforwindowLandmark;
 
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
@@ -18,10 +19,10 @@ function initMap() {
         address = $('#select1').val();
         geocodeAddress(address);
         //getCurrentLocation();
-        socket.emit('scrapeWiki', { address });
-        socket.emit('myEvents', { address });
-        socket.emit('meetup', { address });
-
+        // socket.emit('scrapeWiki', { address });
+        //socket.emit('myEvents', { address });
+        // socket.emit('meetup', { address });
+        socket.emit('landmarks', { address });
     });
 
 }
@@ -87,6 +88,34 @@ socket.on('returnWikiData', function (data) {
 
 });
 
+socket.on('landmark-data', function(data) {
+    console.log(data);
+    console.log( data.jsonLandmark.landmark);
+    console.log(data.jsonLandmark.lat, data.jsonLandmark.lng);
+
+    var image = {
+        url: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
+        // This marker is 20 pixels wide by 32 pixels high.
+        size: new google.maps.Size(20, 32),
+        // The origin for this image is (0, 0).
+        origin: new google.maps.Point(0, 0),
+        // The anchor for this image is the base of the flagpole at (0, 32).
+        anchor: new google.maps.Point(0, 32)
+    };
+    var shape = {
+        coords: [1, 1, 1, 20, 18, 20, 18, 1],
+        type: 'poly'
+    };
+    var marker = new google.maps.Marker({
+        position: { lat: data.jsonLandmark.lat, lng: data.jsonLandmark.lng },
+        map: map,
+        icon: image,
+        shape: shape,
+        title: data.jsonLandmark.landmark,
+    });
+
+});
+
 function setMapOnAll(map) {
     for (var i = 0; i < markers.length; i++) {
         markers[i].setMap(map);
@@ -103,7 +132,7 @@ function deleteMarkers() {
 }
 
 socket.on('eventsData', function (data) {
-    console.log(data.latlng);
+    console.log(data);
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     var flag = false;
@@ -168,6 +197,28 @@ socket.on('eventsData', function (data) {
 
 });*/
 
+function callback(results, status) {
+    if (status === google.maps.places.PlacesServiceStatus.OK) {
+        for (var i = 0; i < results.length; i++) {
+            console.log(results[i]);
+            createMarker(results[i]);
+        }
+    }
+}
+
+function createMarker(place) {
+    var placeLoc = place.geometry.location;
+    var marker = new google.maps.Marker({
+        map: map,
+        position: place.geometry.location
+    });
+
+    google.maps.event.addListener(marker, 'click', function () {
+        infowindow.setContent(place.name);
+        infowindow.open(map, this);
+    });
+}
+
 function geocodeAddress(address) {
     deleteMarkers();
     console.log("Hi");
@@ -194,10 +245,21 @@ function geocodeAddress(address) {
                 this.infowindow.close();
             });
 
-            //infowindowArray.push(infowindow);
-            //myfunc();
+            // infowindow = new google.maps.InfoWindow();
+            // var request = {
+            //     location: results[0].geometry.location,
+            //    // radius: '500',
+            //     query: 'landmark'
+            // };
 
+            // service = new google.maps.places.PlacesService(map);
+            // service.textSearch(request, callback);
         }
+
+        //infowindowArray.push(infowindow);
+        //myfunc();
+
+
         else if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
             setTimeout(function () {
                 geocodeAddress(address);

@@ -65,6 +65,66 @@ io.on(`connection`, (socket) => {
 
     });
 
+    socket.on('landmarks', (address) => {
+        let newAddress = encodeURI(address.address);
+        console.log(newAddress);
+        var phrases = [];
+        var jsonLandmark = {};
+        var landmarkName = 'landmark', landmarkLat = 'lat', landmarkLng = 'lng';
+        var options = {
+            uri: `http://pakistani.pk/category/things-to-do/${newAddress}-attractions/tag/attractions/landmarks/`,
+            transform: function (body) {
+                return cheerio.load(body);
+            }
+        };
+        console.log(options.uri);
+        
+        var options1 = {
+            provider: 'google',
+
+            // Optional depending on the providers 
+            httpAdapter: 'https', // Default 
+            apiKey: 'AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ', // for Mapquest, OpenCage, Google Premier 
+            formatter: null         // 'gpx', 'string', ... 
+        };
+        var geocoder = NodeGeocoder(options1);
+        rp(options)
+            .then(function ($) {
+                console.log('hi');
+                //landmarkName = 'landmark', landmarkLat = 'lat', landmarkLng = 'lng';
+                $('.jrTableGrid.jrDataList.jrResults').find('.jrRow').each(function () {
+                    //console.log($(this).find('.jr-listing-outer').find('.jrContentTitle').find('a').text());
+                    phrases.push($(this).find('.jr-listing-outer').find('.jrContentTitle').find('a').text());
+                });
+            }).then(() => {
+                for (let i = 0; i < phrases.length; ++i) {
+                    geocoder.geocode(phrases[i]).then(function (res) {
+                        if (res[0] && res.statusCode !== 400) {
+                            //console.log(phrases[i]);
+                            //console.log(res[0].latitude, res[0].longitude)
+                            jsonLandmark[landmarkName] = phrases[i];
+                            jsonLandmark[landmarkLat] = res[0].latitude;
+                            jsonLandmark[landmarkLng] = res[0].longitude;
+                            socket.emit('landmark-data', { jsonLandmark });
+                            //console.log(typeof json['lat'])
+                            // json['landmark-position'] = { lat: res[0].latitude, lng: res[0].longitude };
+                        }
+                        
+                        if (jsonLandmark){
+                            
+                            console.log(jsonLandmark[landmarkName]);
+                        }
+                            
+                    });
+                    //console.log(phrases[i]);
+                }
+            })
+            .catch(function (err) {
+                // Crawling failed or Cheerio choked... 
+                console.log(err);
+            });
+    });
+
     socket.on('myEvents', (address) => {
         var detailsArray = [];
         var json = {};
@@ -133,9 +193,9 @@ io.on(`connection`, (socket) => {
                             // console.log("--------------")
 
                         }
-                     })//.then(() => {
+                    })//.then(() => {
                     //     //let i = 0;
-                        
+
                     //     request(json[eventDetails], function (error, response, html) {
                     //         if (!error && response.statusCode == 200) {
                     //             var $ = cheerio.load(html);
@@ -144,10 +204,10 @@ io.on(`connection`, (socket) => {
                     //         }
                     //     });
                     /*})*/.then(() => {
-                        // console.log(json[eventName]);
-                        socket.emit("eventsData", json);
-                        // console.log(name + " emitted");
-                    })
+                            // console.log(json[eventName]);
+                            socket.emit("eventsData", json);
+                            // console.log(name + " emitted");
+                        })
                         .catch(function (err) {
                             console.log(err);
                         });
