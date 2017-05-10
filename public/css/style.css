@@ -1,6 +1,6 @@
 #map {
       height: 100%;
-      width: 1089px;
+      width: 100%;
       float:right;
     }
     /* Optional: Makes the sample page fill the window. */
@@ -27,7 +27,7 @@
     }
 
     #videos {
-      text-align: center;
+      
       position: absolute;
       top: 30px;
       left: 80%;
@@ -41,10 +41,12 @@
     }
 
     .chat__sidebar {
+      position: absolute;
       float:left;
-  overflow-y: scroll;
-  width: 260px;
-  height: 100vh;
-  background: -moz-linear-gradient(125deg, rgba(39,107,130,1) 0%, rgba(49,84,129,1) 100%); /* ff3.6+ */
-  
+      overflow-y: scroll;
+      width: 260px;
+      height: 100vh;
+   z-index: 5;
+      background-color: #fff;
+      border: 1px solid #999;
 }
