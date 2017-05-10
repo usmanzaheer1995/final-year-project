@@ -19,10 +19,11 @@ function initMap() {
         address = $('#select1').val();
         geocodeAddress(address);
         //getCurrentLocation();
-        // socket.emit('scrapeWiki', { address });
-        //socket.emit('myEvents', { address });
-        // socket.emit('meetup', { address });
+        socket.emit('scrapeWiki', { address });
+        socket.emit('myEvents', { address });
+        socket.emit('meetup', { address });
         socket.emit('landmarks', { address });
+        socket.emit('videos', { address });
     });
 
 }
@@ -59,13 +60,13 @@ function showPosition(position) {
 }
 
 function showWikiDetails(arrayIndex, array) {
-    var list = $("#names-list");
+    let list = $("#names-list");
     list.empty();
-    var parent = list.parent();
+    let parent = list.parent();
 
     list.each(function (i) {
         //console.log(data.length);
-        for (var x = 0; x < array.length; x++) {
+        for (let x = 0; x < array.length; x++) {
             //console.log(array[x]);
             $(this).append('<li>' + '<strong>' + arrayIndex[x] + '</strong>' + ': ' + array[x] + '</li>');
             if (x == array.length - 1) {
@@ -74,6 +75,20 @@ function showWikiDetails(arrayIndex, array) {
         }
     });
 }
+var videosIndex = 0;
+socket.on('videosData', function (data) {
+    //console.log(data.items[videosIndex].id.videoId);
+    if (videosIndex === 0) {
+        $("#videos ul").empty();
+    }
+    $("#videos ul").append('<li><a href="/youtube/' + data.items[videosIndex].id.videoId + '" target="_blank"><span class="tab">' + data.items[videosIndex].snippet.title + '</span></a></li>');
+    videosIndex++;
+
+    var size = Object.keys(data).length;
+    if (videosIndex === size - 1) {
+        videosIndex = 0;
+    }
+});
 
 socket.on('returnWikiData', function (data) {
     //console.log('wiki data');
@@ -88,10 +103,10 @@ socket.on('returnWikiData', function (data) {
 
 });
 
-socket.on('landmark-data', function(data) {
-    console.log(data);
-    console.log( data.jsonLandmark.landmark);
-    console.log(data.jsonLandmark.lat, data.jsonLandmark.lng);
+socket.on('landmark-data', function (data) {
+    //console.log(data);
+    //console.log( data.jsonLandmark.landmark);
+    //console.log(data.jsonLandmark.lat, data.jsonLandmark.lng);
 
     var image = {
         url: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',

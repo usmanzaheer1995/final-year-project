@@ -4,17 +4,18 @@ const express = require('express');
 const socketIO = require('socket.io');
 const rp = require('request-promise');
 const request = require('request');
-const axios = require('axios');
+const hbs = require('hbs');
 
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
 var NodeGeocoder = require('node-geocoder');
 var { meetup } = require('./utils/meetup');
+var YouTube = require('youtube-node');
 var striptags = require('striptags');
 var cheerio = require('cheerio'); // Basically jQuery for node.js 
 
 var app = express();
-
+app.set('view engine', 'hbs');
 var server = http.createServer(app);
 var io = socketIO(server);
 
@@ -65,6 +66,30 @@ io.on(`connection`, (socket) => {
 
     });
 
+    socket.on('videos', (address) => {
+        console.log('videos');
+        let newAddress = address.address;
+        var youTube = new YouTube();
+        youTube.setKey('AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ');
+        youTube.addParam('date');
+        youTube.search(newAddress, 5, function (error, result) {
+            if (error) {
+                console.log(error);
+            }
+            else {
+                for (let i = 0; i < 5; ++i) {
+                   // console.log(JSON.stringify(result.items[i].id.videoId, null, 2));
+                   // console.log(JSON.stringify(result.items[i].snippet.title, null, 2));
+                    socket.emit('videosData', result);
+                }
+                //console.log(JSON.stringify(result, null, 2));
+                //return result;
+                //
+                //console.log(JSON.stringify(result.items[1].id.videoId, null, 2));
+            }
+        });
+    });
+
     socket.on('landmarks', (address) => {
         let newAddress = encodeURI(address.address);
         console.log(newAddress);
@@ -78,7 +103,7 @@ io.on(`connection`, (socket) => {
             }
         };
         console.log(options.uri);
-        
+
         var options1 = {
             provider: 'google',
 
@@ -109,12 +134,9 @@ io.on(`connection`, (socket) => {
                             //console.log(typeof json['lat'])
                             // json['landmark-position'] = { lat: res[0].latitude, lng: res[0].longitude };
                         }
+
                         
-                        if (jsonLandmark){
-                            
-                            console.log(jsonLandmark[landmarkName]);
-                        }
-                            
+
                     });
                     //console.log(phrases[i]);
                 }
@@ -278,6 +300,15 @@ io.on(`connection`, (socket) => {
 
 
 });
+app.get('/youtube/:id', (request, response) => {
+    var id = request.params.id;
+    //console.log(id);
+    response.render('youtube.hbs', {   //render checks for templates you have made, in this case about.hbs and home.hbs
+        src: id,
+        //currentYear: new Date().getFullYear(),
+    });
+});
+
 server.listen(port, () => {
     console.log(`Server listening on port ${port}`);
 });

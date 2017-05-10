@@ -26,6 +26,20 @@
       padding-left: 10px;
     }
 
+    #videos {
+      text-align: center;
+      position: absolute;
+      top: 30px;
+      left: 80%;
+      float: right;
+      width: 260px;
+      height: 260px;
+      z-index: 5;
+      background-color: #fff;
+      border: 1px solid #999;
+      overflow-x: scroll;
+    }
+
     .chat__sidebar {
       float:left;
   overflow-y: scroll;

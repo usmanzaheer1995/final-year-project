@@ -9,6 +9,7 @@ var fs = require('fs');
 var request = require('request');
 
 var { meetup } = require('../server/utils/meetup');
+var { youtube } = require('../server/utils/youtube');
 
 var Twit = require('twit');
 
