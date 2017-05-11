@@ -50,3 +50,7 @@
       background-color: #fff;
       border: 1px solid #999;
 }
+
+#my-events {
+  display: none;
+}

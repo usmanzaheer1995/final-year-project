@@ -3,6 +3,7 @@ var socket = io();
 var map, geocoder;
 var locations = [];
 var infowindowArray = [];
+var myEvents = [];
 var markers = [];
 var address;
 var inforwindowLandmark;
@@ -18,7 +19,7 @@ function initMap() {
 
         address = $('#select1').val();
         geocodeAddress(address);
-        //getCurrentLocation();
+        getCurrentLocation();
         socket.emit('scrapeWiki', { address });
         socket.emit('myEvents', { address });
         socket.emit('meetup', { address });
@@ -27,6 +28,8 @@ function initMap() {
     });
 
 }
+
+
 
 function getCurrentLocation() {
     if (navigator.geolocation) {
@@ -38,23 +41,25 @@ function getCurrentLocation() {
     }
 }
 function showPosition(position) {
-    // x.innerHTML = "Latitude: " + position.coords.latitude +
-    //    "<br>Longitude: " + position.coords.longitude;
     console.log(position.coords.latitude, position.coords.longitude);
 
     var latLng = { lat: position.coords.latitude, lng: position.coords.longitude };
-    map.setCenter(latLng);
+    //map.setCenter(latLng);
     var marker = new google.maps.Marker({
         map: map,
-        position: latLng
+        position: latLng,
+        icon:'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
     });
     marker.infowindow = new google.maps.InfoWindow({
         content: 'current Location',
         // map: map
     });
 
-    google.maps.event.addListener(marker, 'click', function () {
+    google.maps.event.addListener(marker, 'mouseover', function () {
         this.infowindow.open(map, this);
+    });
+    google.maps.event.addListener(marker, 'mouseout', function () {
+       this.infowindow.close();
     });
     // markers.push(marker);
 }
@@ -129,6 +134,27 @@ socket.on('landmark-data', function (data) {
         title: data.jsonLandmark.landmark,
     });
 
+    google.maps.event.addListener(marker, 'click', function () {
+        //geocodeAddress(data.jsonLandmark.landmark);
+        address = data.jsonLandmark.landmark;
+        // console.log(data.jsonLandmark.landmark);
+
+        geocoder.geocode({ 'address': data.jsonLandmark.landmark }, function (results, status) {
+
+            if (status === 'OK') {
+                map.setCenter(results[0].geometry.location);
+                map.zoom = 15;
+                //console.log(landmarkName);
+                socket.emit('scrapeWiki', { address });
+                socket.emit('videos', { address });
+            }
+            else {
+                alert('Geocode was not successful for the following reason: ' + status);
+            }
+
+        });
+    });
+
 });
 
 function setMapOnAll(map) {
@@ -146,57 +172,65 @@ function deleteMarkers() {
     locations = [];
 }
 
-socket.on('eventsData', function (data) {
-    console.log(data);
+var myEventsClicked = false;
+document.getElementById('my-events').addEventListener('click', function () {
+    //alert('clicked');
+    if (myEventsClicked === false) {
+        myEventsClicked = true;
+        for (let i = 0; i < myEvents.length; ++i) {
+            console.log(myEvents[i].location);
+            var flag = false;
+            for (let index = 0; index < locations.length; ++index) {
+                if (locations[index] === myEvents[i].location) {
+                    //console.log(markers[i].infowindow.content);
+                    markers[index].infowindow.setContent(markers[index].infowindow.content + '<li>' + '<a target = "_blank" href = "' + myEvents[i].details + '">' + myEvents[i].name + '</a>' + '</li>');
+                    flag = true;
 
-    //////////////////////////////////////////////////////////////////////////////////////////////
-    var flag = false;
-    for (var i = 0; i < locations.length; ++i) {
-        if (locations[i] === data.location) {
-            //console.log(markers[i].infowindow.content);
-            markers[i].infowindow.setContent(markers[i].infowindow.content + '<li>' + '<a target = "_blank" href = "' + data.details + '">' + data.name + '</a>' + '</li>');
-            flag = true;
+                }
+            }
 
+            if (flag === false) {
+
+                var marker = new google.maps.Marker({
+                    map: map,
+                    position: myEvents[i].latlng,
+                    icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+                });
+                //marker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
+
+                marker.infowindow = new google.maps.InfoWindow({
+                    //content: '<li>' + data.name + " " + '</li>'
+                    content: '<li>' + '<a target = "_blank" href = "' + myEvents[i].details + '">' + myEvents[i].name + '</a>' + '</li>'
+                });
+
+                markers.push(marker);
+                locations.push(myEvents[i].location);
+
+                google.maps.event.addListener(marker, 'mouseover', function () {
+                    this.infowindow.open(map, this);
+                });
+                google.maps.event.addListener(marker, 'click', function () {
+                    this.infowindow.close();
+                });
+            }
         }
     }
-
-    if (flag === false) {
-
-        var marker = new google.maps.Marker({
-            map: map,
-            position: data.latlng,
-            icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
-        });
-        //marker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
-
-        marker.infowindow = new google.maps.InfoWindow({
-            //content: '<li>' + data.name + " " + '</li>'
-            content: '<li>' + '<a target = "_blank" href = "' + data.details + '">' + data.name + '</a>' + '</li>'
-        });
-
-        markers.push(marker);
-        locations.push(data.location);
-
-        google.maps.event.addListener(marker, 'mouseover', function () {
-            this.infowindow.open(map, this);
-        });
-        google.maps.event.addListener(marker, 'click', function () {
-            this.infowindow.close();
-        });
-
-
+    else {
+        deleteMarkers();
+        myEventsClicked = false;
     }
 
-    // for (var index = 0; index < locations.length; index++) {
-    //     console.log(locations[index]);
-    // }
-    //console.log(markers.length);
-    //console.log('\n\n');
-
-    //markers[0].infowindow.setContent('islamabad' + '<li>' + markers[0].infowindow.content + '</li>');
-    //console.log(markers[0].infowindow.content);
 });
+socket.on('eventsData', function (data) {
+    //console.log(data);
+    myEvents.push(data);
+    $('#my-events').show();
+});
+socket.on('meetupData', function (data) {
+    //console.log(data);
+    myEvents.push(data);
 
+});
 /*socket.on('eventsDetails', function (data) {
     console.log(data.name);
     for (var i = 0; i < markers.length; ++i) {
@@ -250,14 +284,18 @@ function geocodeAddress(address) {
                 content: address,
                 // map: map
             });
-            markers.push(marker);
-            locations.push(address);
+            //markers.push(marker);
+            //locations.push(address);
             //  infowindow.open(map, marker);
             google.maps.event.addListener(marker, 'mouseover', function () {
                 this.infowindow.open(map, this);
             });
-            google.maps.event.addListener(marker, 'click', function () {
+            google.maps.event.addListener(marker, 'mouseout', function () {
                 this.infowindow.close();
+            });
+            google.maps.event.addListener(marker, 'click', function () {
+                socket.emit('scrapeWiki', { address });
+                socket.emit('videos', { address });
             });
 
             // infowindow = new google.maps.InfoWindow();

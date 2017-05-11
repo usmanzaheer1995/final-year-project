@@ -27,27 +27,27 @@ io.on(`connection`, (socket) => {
     console.log('new user connection');
 
     socket.on('scrapeWiki', (address) => {
-
-
+        
         console.log('scraping wiki');
 
         var addr = address.address;
+        console.log(addr);
         var newAddress = encodeURI(addr);
-
+        console.log(newAddress);
         let options3 = {
             uri: `https://en.wikipedia.org/wiki/${newAddress}`,
             transform: function (body) {
                 return cheerio.load(body);
             }
         };
-        // console.log(options.uri);
+        console.log(options3.uri);
         rp(options3)
             .then(function ($) {
                 // Process html like you would with jQuery... 
                 console.log('WIKI');
                 var json1 = {};
 
-                $("table.vcard tr").each(function (tr_index, tr) {
+                $("table.infobox tr").each(function (tr_index, tr) {
                     var th_text = $(this).find("th").text();
                     var prop_name = th_text.trim().toLowerCase().replace(/[^a-z]/g, " ");
 
@@ -287,7 +287,7 @@ io.on(`connection`, (socket) => {
 
                         //console.log(json[eventDetails]);
 
-                        socket.emit('eventsData', json);
+                        socket.emit('meetupData', json);
                         thisFlag = false;
                     }
                 }
