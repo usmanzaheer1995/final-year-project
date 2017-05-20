@@ -27,7 +27,7 @@ io.on(`connection`, (socket) => {
     console.log('new user connection');
 
     socket.on('scrapeWiki', (address) => {
-        
+
         console.log('scraping wiki');
 
         var addr = address.address;
@@ -69,23 +69,37 @@ io.on(`connection`, (socket) => {
     socket.on('videos', (address) => {
         console.log('videos');
         let newAddress = address.address;
+        console.log(newAddress)
         var youTube = new YouTube();
         youTube.setKey('AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ');
-        youTube.addParam('date');
-        youTube.search(newAddress, 5, function (error, result) {
+        youTube.addParam("type", 'video');
+        youTube.search(newAddress + " facts", 2, function (error, result) {
             if (error) {
                 console.log(error);
             }
             else {
-                for (let i = 0; i < 5; ++i) {
-                   // console.log(JSON.stringify(result.items[i].id.videoId, null, 2));
-                   // console.log(JSON.stringify(result.items[i].snippet.title, null, 2));
-                    socket.emit('videosData', result);
-                }
-                //console.log(JSON.stringify(result, null, 2));
-                //return result;
-                //
-                //console.log(JSON.stringify(result.items[1].id.videoId, null, 2));
+                // console.log(JSON.stringify(result.items[i].id.videoId, null, 2));
+                // console.log(JSON.stringify(result.items[i].snippet.title, null, 2));
+                socket.emit('videosData', result);
+            }
+        });
+        youTube.search(newAddress + " documentary", 2, function (error, result) {
+            console.log('documentary')
+            if (error) {
+                console.log(error);
+            }
+            else {
+                socket.emit('videosData', result);
+            }
+        });
+
+        youTube.search(newAddress + " best resturants", 2, function (error, result) {
+            console.log('documentary')
+            if (error) {
+                console.log(error);
+            }
+            else {
+                socket.emit('videosData', result);
             }
         });
     });
@@ -135,7 +149,7 @@ io.on(`connection`, (socket) => {
                             // json['landmark-position'] = { lat: res[0].latitude, lng: res[0].longitude };
                         }
 
-                        
+
 
                     });
                     //console.log(phrases[i]);
@@ -144,6 +158,33 @@ io.on(`connection`, (socket) => {
             .catch(function (err) {
                 // Crawling failed or Cheerio choked... 
                 console.log(err);
+            });
+    });
+
+    socket.on('scrapeBlogs', (address) => {
+        console.log('BLOGS');
+        let blogs = {}
+        let options = {
+            uri: `http://blogs.tribune.com.pk/tag/${address.address}/`,
+            transform: function (body) {
+                return cheerio.load(body);
+            }
+        };
+        rp(options)
+            .then(function ($) {
+                var abc = $('.page-content').find('.story').find('.title').find('a')
+                for (let i = 0; i < abc.length; ++i) {
+
+                    blogs['title'] = abc[i].attribs.title;
+                    blogs['link'] = abc[i].attribs.href;
+
+                    //console.log(blogs['title']);
+                    //console.log(blogs['link']);
+                    socket.emit('blogsData', blogs);
+                }
+            })
+            .catch(function (err) {
+                // Crawling failed or Cheerio choked... 
             });
     });
 
@@ -172,9 +213,6 @@ io.on(`connection`, (socket) => {
             .then(function ($) {
                 // Process html like you would with jQuery... 
 
-                /* var json = {};
-                 var eventName = "name", eventLocation = "location", eventTime = "time", eventLatLng = "latlng", eventDetails = "details"
-                     , details = "e_details";*/
                 console.log("HERE");
                 $('#cat-listing-holder .listing-container').each(function () {
                     var name = ($(this).find('.listing-container-block-title').children('a').text());

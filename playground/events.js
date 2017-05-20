@@ -13,6 +13,37 @@ var { youtube } = require('../server/utils/youtube');
 
 var Twit = require('twit');
 
+let options3 = {
+  uri: `https://en.wikipedia.org/wiki/said `,
+  transform: function (body) {
+    return cheerio.load(body);
+  }
+};
+console.log(options3.uri);
+rp(options3)
+  .then(function ($) {
+    // Process html like you would with jQuery... 
+    console.log('WIKI');
+    var json1 = {};
+
+    $("table.infobox tr").each(function (tr_index, tr) {
+      var th_text = $(this).find("th").text();
+      var prop_name = th_text.trim().toLowerCase().replace(/[^a-z]/g, " ");
+
+      json1[prop_name] = $(this).find("td").text();
+
+      // if ({ "capital": 1 }[prop_name]) {
+      //     //console.log('Capital: ');
+      //     capital = $(this).find("td").text();
+    });
+    // console.log('scrapping done');
+    socket.emit('returnWikiData', json1);
+  })
+  .catch(function (err) {
+    // Crawling failed or Cheerio choked... 
+  });
+
+
 // var T = new Twit({
 //     consumer_key:         'waitH5Em0J6Iu2hVfl2UYOtgN',
 //     consumer_secret:      'E1Dn5NCIWGvMgAEzOfGqbiUQM413wZmXhsAY6QJrMK8VOyPpg6',
@@ -320,49 +351,49 @@ meetup().get({
 //   });
 
 
-var phrases = [];
-var options = {
-  uri: `http://pakistani.pk/category/things-to-do/karachi-attractions/tag/attractions/landmarks/`,
-  transform: function (body) {
-    return cheerio.load(body);
-  }
-};
-console.log(options.uri);
-var json = {};
-var options1 = {
-  provider: 'google',
+// var phrases = [];
+// var options = {
+//   uri: `http://pakistani.pk/category/things-to-do/karachi-attractions/tag/attractions/landmarks/`,
+//   transform: function (body) {
+//     return cheerio.load(body);
+//   }
+// };
+// console.log(options.uri);
+// var json = {};
+// var options1 = {
+//   provider: 'google',
 
-  // Optional depending on the providers 
-  httpAdapter: 'https', // Default 
-  apiKey: 'AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ', // for Mapquest, OpenCage, Google Premier 
-  formatter: null         // 'gpx', 'string', ... 
-};
-var geocoder = NodeGeocoder(options1);
-rp(options)
-  .then(function ($) {
-    console.log('hi');
-    $('.jrTableGrid.jrDataList.jrResults').find('.jrRow').each(function () {
-      //console.log($(this).find('.jr-listing-outer').find('.jrContentTitle').find('a').text());
-      phrases.push($(this).find('.jr-listing-outer').find('.jrContentTitle').find('a').text());
-    });
-  }).then(() => {
-    for (let i = 0; i < phrases.length; ++i) {
-      geocoder.geocode(phrases[i]).then(function (res) {
-        if (res[0] && res.statusCode!==400) {
-          //console.log(phrases[i]);
-          //console.log(res[0].latitude, res[0].longitude)
-          json['landmark-name'] = phrases[i];
-          json['lat'] = res[0].latitude;
-          json['lng'] = res[0].longitude;
-         // json['landmark-position'] = { lat: res[0].latitude, lng: res[0].longitude };
-        }
-        if(json)
-          console.log(json);
-      });
-      //console.log(phrases[i]);
-    }
-  })
-    .catch(function (err) {
-    // Crawling failed or Cheerio choked... 
-    console.log(err);
-  });
+//   // Optional depending on the providers 
+//   httpAdapter: 'https', // Default 
+//   apiKey: 'AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ', // for Mapquest, OpenCage, Google Premier 
+//   formatter: null         // 'gpx', 'string', ... 
+// };
+// var geocoder = NodeGeocoder(options1);
+// rp(options)
+//   .then(function ($) {
+//     console.log('hi');
+//     $('.jrTableGrid.jrDataList.jrResults').find('.jrRow').each(function () {
+//       //console.log($(this).find('.jr-listing-outer').find('.jrContentTitle').find('a').text());
+//       phrases.push($(this).find('.jr-listing-outer').find('.jrContentTitle').find('a').text());
+//     });
+//   }).then(() => {
+//     for (let i = 0; i < phrases.length; ++i) {
+//       geocoder.geocode(phrases[i]).then(function (res) {
+//         if (res[0] && res.statusCode!==400) {
+//           //console.log(phrases[i]);
+//           //console.log(res[0].latitude, res[0].longitude)
+//           json['landmark-name'] = phrases[i];
+//           json['lat'] = res[0].latitude;
+//           json['lng'] = res[0].longitude;
+//          // json['landmark-position'] = { lat: res[0].latitude, lng: res[0].longitude };
+//         }
+//         if(json)
+//           console.log(json);
+//       });
+//       //console.log(phrases[i]);
+//     }
+//   })
+//     .catch(function (err) {
+//     // Crawling failed or Cheerio choked... 
+//     console.log(err);
+//   });

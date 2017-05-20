@@ -16,7 +16,7 @@ function initMap() {
     geocoder = new google.maps.Geocoder();
 
     document.getElementById('submit').addEventListener('click', function () {
-
+        $("#videos ul").empty();
         address = $('#select1').val();
         geocodeAddress(address);
         getCurrentLocation();
@@ -25,6 +25,7 @@ function initMap() {
         socket.emit('meetup', { address });
         socket.emit('landmarks', { address });
         socket.emit('videos', { address });
+        socket.emit('scrapeBlogs', { address });
     });
 
 }
@@ -48,7 +49,7 @@ function showPosition(position) {
     var marker = new google.maps.Marker({
         map: map,
         position: latLng,
-        icon:'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+        icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
     });
     marker.infowindow = new google.maps.InfoWindow({
         content: 'current Location',
@@ -59,7 +60,7 @@ function showPosition(position) {
         this.infowindow.open(map, this);
     });
     google.maps.event.addListener(marker, 'mouseout', function () {
-       this.infowindow.close();
+        this.infowindow.close();
     });
     // markers.push(marker);
 }
@@ -80,19 +81,15 @@ function showWikiDetails(arrayIndex, array) {
         }
     });
 }
-var videosIndex = 0;
 socket.on('videosData', function (data) {
-    //console.log(data.items[videosIndex].id.videoId);
-    if (videosIndex === 0) {
-        $("#videos ul").empty();
-    }
-    $("#videos ul").append('<li><a href="/youtube/' + data.items[videosIndex].id.videoId + '" target="_blank"><span class="tab">' + data.items[videosIndex].snippet.title + '</span></a></li>');
-    videosIndex++;
 
-    var size = Object.keys(data).length;
-    if (videosIndex === size - 1) {
-        videosIndex = 0;
+    var size = Object.keys(data.items).length;
+
+    for (let i = 0; i < size; ++i) {
+        console.log(data.items[i].id.videoId);
+        $("#videos ul").append('<li><a href="/youtube/' + data.items[i].id.videoId + '" target="_blank"><span class="tab">' + data.items[i].snippet.title + '</span></a></li>');
     }
+
 });
 
 socket.on('returnWikiData', function (data) {
@@ -245,6 +242,11 @@ socket.on('meetupData', function (data) {
     }
 
 });*/
+
+socket.on('blogsData', function (data) {
+    console.log(data.title);
+    console.log(data.link);
+});
 
 function callback(results, status) {
     if (status === google.maps.places.PlacesServiceStatus.OK) {
