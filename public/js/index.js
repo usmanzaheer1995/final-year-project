@@ -142,6 +142,7 @@ socket.on('landmark-data', function (data) {
                 map.setCenter(results[0].geometry.location);
                 map.zoom = 15;
                 //console.log(landmarkName);
+                 $("#videos ul").empty();
                 socket.emit('scrapeWiki', { address });
                 socket.emit('videos', { address });
             }
