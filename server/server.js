@@ -338,14 +338,14 @@ io.on(`connection`, (socket) => {
 
 
 });
-app.get('/youtube/:id', (request, response) => {
-    var id = request.params.id;
-    //console.log(id);
-    response.render('youtube.hbs', {   //render checks for templates you have made, in this case about.hbs and home.hbs
-        src: id,
-        //currentYear: new Date().getFullYear(),
-    });
-});
+// app.get('/youtube/:id', (request, response) => {
+//     var id = request.params.id;
+//     //console.log(id);
+//     response.render('youtube.hbs', {   //render checks for templates you have made, in this case about.hbs and home.hbs
+//         src: id,
+//         //currentYear: new Date().getFullYear(),
+//     });
+// });
 
 server.listen(port, () => {
     console.log(`Server listening on port ${port}`);

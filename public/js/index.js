@@ -87,7 +87,7 @@ socket.on('videosData', function (data) {
 
     for (let i = 0; i < size; ++i) {
         console.log(data.items[i].id.videoId);
-        $("#videos ul").append('<li><a href="/youtube/' + data.items[i].id.videoId + '" target="_blank"><span class="tab">' + data.items[i].snippet.title + '</span></a></li>');
+        $("#videos ul").append('<li><a href="https://www.youtube.com/embed/'+ data.items[i].id.videoId +'?enablejsapi=1" target="_blank"><span class="tab">' + data.items[i].snippet.title + '</span></a></li>');
     }
 
 });
