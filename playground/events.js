@@ -13,67 +13,68 @@ var { meetup } = require('../server/utils/meetup');
 
 var Twit = require('twit');
 
-let options3 = {
-  uri: `http://pakistani.pk/category/things-to-do/islamabad-attractions/tag/attractions/landmarks/`,
+var options = {
+  uri: `http://www.myevents.pk/event_loc/islamabad-events/`,
   transform: function (body) {
     return cheerio.load(body);
   }
 };
-console.log(options3.uri);
-var phrases = [];
-rp(options3)
+console.log(options.uri);
+rp(options)
   .then(function ($) {
-    console.log('hi');
-    //landmarkName = 'landmark', landmarkLat = 'lat', landmarkLng = 'lng';
-    $('.jrTableGrid.jrDataList.jrResults').find('.jrRow').each(function () {
-      //console.log($(this).find('.jr-listing-outer').find('.jrContentTitle').find('a').text());
-      phrases.push($(this).find('.jr-listing-outer').find('.jrContentTitle').find('a').text());
-    });
-  }).then(() => {
-    for (let i = 0; i < phrases.length; ++i) {
-      //console.log(phrases[i]);
-      let abc = encodeURI(phrases[i])
+    // Process html like you would with jQuery... 
+
+    console.log("HERE");
+    $('#cat-listing-holder .listing-container').each(function () {
+      var name = ($(this).find('.listing-container-block-title').children('a').text());
+      // console.log(json[eventName]);
+      //var location = ($(this).find('.listing-container-block-title .listing-container-tagline').clone().children().remove().end().text().replace(/\s+/g, ' ')));
+      var location = ($(this).find('.listing-container-block-title .listing-container-tagline').clone().children().remove().end().text().replace(/\s+/g, ' '))
+      //console.log(location);
+      var time = ($(this).find('.listing-container-rating').find('span').text() + "\n");
+
+      var details = ($(this).find('.listing-container-block-title').children('a').attr('href'));
+
+      // var options = {
+      //     provider: 'google',
+
+      //     // Optional depending on the providers 
+      //     httpAdapter: 'https', // Default 
+      //     apiKey: `${apiKey}`, // for Mapquest, OpenCage, Google Premier 
+      //     formatter: null         // 'gpx', 'string', ... 
+      // };
+      // var geocoder = NodeGeocoder(options);
+      let abc = encodeURI(location)
       let geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${abc}`;
-      //console.log(geocodeUrl);
       axios.get(geocodeUrl).then((response) => {
         if (response.data.status == 'ZERO_RESULTS') {
           throw new Error('Unable to find that address.');    // move to catch block
         }
 
         if (response.data.results[0].geometry && response.statusCode !== 400) {
-          console.log('hi')
+          //console.log('hi')
           var latitude = response.data.results[0].geometry.location.lat;
           var longitude = response.data.results[0].geometry.location.lng;
           //console.log(latitude, " and " , longitude);
           console.log(geocodeUrl);
           console.log(longitude, latitude);
+          //json[eventLocation] = location;
+          //json[eventLocation].push(location);
+          //json[eventName] = name;
+          //json[eventName].push(name);
+          // json[eventTime] = time;
+          // json[eventDetails] = details;
+          // json[eventLatLng] = { lat: latitude, lng: longitude };
+          // detailsArray.push(json[eventDetails]);
           //return axios.get(weatherUrl);   //second promise
         }
-      });
-      // geocoder.geocode(phrases[i]).then(function (res) {
-      //   if (res[0] && res.statusCode !== 400) {
-      //     //console.log(phrases[i]);
-      //     //console.log(res[0].latitude, res[0].longitude)
-      //     jsonLandmark[landmarkName] = phrases[i];
-      //     jsonLandmark[landmarkLat] = res[0].latitude;
-      //     jsonLandmark[landmarkLng] = res[0].longitude;
-      //     socket.emit('landmark-data', { jsonLandmark });
-      //     //console.log(typeof json['lat'])
-      //     // json['landmark-position'] = { lat: res[0].latitude, lng: res[0].longitude };
-      //   }
+      })
+        .catch(function (err) {
+          console.log(err);
+        });
 
-
-
-      // });
-      //console.log(phrases[i]);
-    }
-  })
-  .catch(function (err) {
-    // Crawling failed or Cheerio choked... 
-    console.log(err);
+    });
   });
-
-
 // var T = new Twit({
 //     consumer_key:         'waitH5Em0J6Iu2hVfl2UYOtgN',
 //     consumer_secret:      'E1Dn5NCIWGvMgAEzOfGqbiUQM413wZmXhsAY6QJrMK8VOyPpg6',

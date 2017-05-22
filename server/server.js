@@ -156,21 +156,18 @@ io.on(`connection`, (socket) => {
                     //         socket.emit('landmark-data', { jsonLandmark });
                     //         //console.log(typeof json['lat'])
                     //         // json['landmark-position'] = { lat: res[0].latitude, lng: res[0].longitude };
-                    //     }
+                    //     }});
                     let abc = encodeURI(phrases[i])
                     let geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${abc}`;
                     //console.log(geocodeUrl);
                     axios.get(geocodeUrl).then((response) => {
-                        if (response.data.status == 'ZERO_RESULTS') {
-                            throw new Error('Unable to find that address.');    // move to catch block
-                        }
-
-                        if (response.data.results[0].geometry && response.statusCode !== 400) {
+                         if (response.data.results.length>0 && response.statusCode !== 400) {
+                            
                             //console.log('hi')
                             let latitude = response.data.results[0].geometry.location.lat;
                             let longitude = response.data.results[0].geometry.location.lng;
                             //console.log(latitude, " and " , longitude);
-                            //console.log(geocodeUrl);
+                            
                             //console.log(longitude, latitude);
                             jsonLandmark[landmarkName] = phrases[i];
                             jsonLandmark[landmarkLat] = latitude;
@@ -179,8 +176,6 @@ io.on(`connection`, (socket) => {
                         }
                     });
 
-
-                    //console.log(phrases[i]);
                 }
             })
             .catch(function (err) {
@@ -268,13 +263,13 @@ io.on(`connection`, (socket) => {
                             throw new Error('Unable to find that address.');    // move to catch block
                         }
 
-                        if (response.data.results[0].geometry && response.statusCode !== 400) {
+                        if (response.data.results.length>0 && response.statusCode !== 400) {
                             //console.log('hi')
                             var latitude = response.data.results[0].geometry.location.lat;
                             var longitude = response.data.results[0].geometry.location.lng;
-                            //console.log(latitude, " and " , longitude);
-                            //console.log(geocodeUrl);
-                            //console.log(longitude, latitude);
+                            
+                            // console.log(geocodeUrl);
+                            // console.log(longitude, latitude);
                              json[eventLocation] = location;
                             //json[eventLocation].push(location);
                             json[eventName] = name;
@@ -317,7 +312,7 @@ io.on(`connection`, (socket) => {
                     //         }
                     //     });
                     /*})*/.then(() => {
-                            // console.log(json[eventName]);
+                            //console.log(json[eventName]);
                             socket.emit("eventsData", json);
                             // console.log(name + " emitted");
                         })
