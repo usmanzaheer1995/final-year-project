@@ -1,3 +1,11 @@
+/*  Google Maps API keys
+
+    Usman: AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ
+    Sheikh: AIzaSyCBE2UkT6mcn3qxK6ip9IEaHQs26EsyKTg
+
+*/
+const apiKey = 'AIzaSyCBE2UkT6mcn3qxK6ip9IEaHQs26EsyKTg';
+
 const path = require('path');
 const http = require('http');
 const express = require('express');
@@ -5,6 +13,7 @@ const socketIO = require('socket.io');
 const rp = require('request-promise');
 const request = require('request');
 const hbs = require('hbs');
+const axios = require('axios');
 
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
@@ -118,15 +127,15 @@ io.on(`connection`, (socket) => {
         };
         console.log(options.uri);
 
-        var options1 = {
-            provider: 'google',
+        // var options1 = {
+        //     provider: 'google',
 
-            // Optional depending on the providers 
-            httpAdapter: 'https', // Default 
-            apiKey: 'AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ', // for Mapquest, OpenCage, Google Premier 
-            formatter: null         // 'gpx', 'string', ... 
-        };
-        var geocoder = NodeGeocoder(options1);
+        //     // Optional depending on the providers 
+        //     httpAdapter: 'https', // Default 
+        //     apiKey: `${apiKey}`, // for Mapquest, OpenCage, Google Premier 
+        //     formatter: null         // 'gpx', 'string', ... 
+        // };
+        // var geocoder = NodeGeocoder(options1);
         rp(options)
             .then(function ($) {
                 console.log('hi');
@@ -137,21 +146,40 @@ io.on(`connection`, (socket) => {
                 });
             }).then(() => {
                 for (let i = 0; i < phrases.length; ++i) {
-                    geocoder.geocode(phrases[i]).then(function (res) {
-                        if (res[0] && res.statusCode !== 400) {
-                            //console.log(phrases[i]);
-                            //console.log(res[0].latitude, res[0].longitude)
-                            jsonLandmark[landmarkName] = phrases[i];
-                            jsonLandmark[landmarkLat] = res[0].latitude;
-                            jsonLandmark[landmarkLng] = res[0].longitude;
-                            socket.emit('landmark-data', { jsonLandmark });
-                            //console.log(typeof json['lat'])
-                            // json['landmark-position'] = { lat: res[0].latitude, lng: res[0].longitude };
+                    // geocoder.geocode(phrases[i]).then(function (res) {
+                    //     if (res[0] && res.statusCode !== 400) {
+                    //         //console.log(phrases[i]);
+                    //         //console.log(res[0].latitude, res[0].longitude)
+                    //         jsonLandmark[landmarkName] = phrases[i];
+                    //         jsonLandmark[landmarkLat] = res[0].latitude;
+                    //         jsonLandmark[landmarkLng] = res[0].longitude;
+                    //         socket.emit('landmark-data', { jsonLandmark });
+                    //         //console.log(typeof json['lat'])
+                    //         // json['landmark-position'] = { lat: res[0].latitude, lng: res[0].longitude };
+                    //     }
+                    let abc = encodeURI(phrases[i])
+                    let geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${abc}`;
+                    //console.log(geocodeUrl);
+                    axios.get(geocodeUrl).then((response) => {
+                        if (response.data.status == 'ZERO_RESULTS') {
+                            throw new Error('Unable to find that address.');    // move to catch block
                         }
 
-
-
+                        if (response.data.results[0].geometry && response.statusCode !== 400) {
+                            //console.log('hi')
+                            let latitude = response.data.results[0].geometry.location.lat;
+                            let longitude = response.data.results[0].geometry.location.lng;
+                            //console.log(latitude, " and " , longitude);
+                            //console.log(geocodeUrl);
+                            //console.log(longitude, latitude);
+                            jsonLandmark[landmarkName] = phrases[i];
+                            jsonLandmark[landmarkLat] = latitude;
+                            jsonLandmark[landmarkLng] = longitude;
+                            socket.emit('landmark-data', { jsonLandmark });
+                        }
                     });
+
+
                     //console.log(phrases[i]);
                 }
             })
@@ -224,36 +252,61 @@ io.on(`connection`, (socket) => {
 
                     var details = ($(this).find('.listing-container-block-title').children('a').attr('href'));
 
-                    var options = {
-                        provider: 'google',
+                    // var options = {
+                    //     provider: 'google',
 
-                        // Optional depending on the providers 
-                        httpAdapter: 'https', // Default 
-                        apiKey: 'AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ', // for Mapquest, OpenCage, Google Premier 
-                        formatter: null         // 'gpx', 'string', ... 
-                    };
-                    var geocoder = NodeGeocoder(options);
+                    //     // Optional depending on the providers 
+                    //     httpAdapter: 'https', // Default 
+                    //     apiKey: `${apiKey}`, // for Mapquest, OpenCage, Google Premier 
+                    //     formatter: null         // 'gpx', 'string', ... 
+                    // };
+                    // var geocoder = NodeGeocoder(options);
+                    let abc = encodeURI(location)
+                    let geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${abc}`;
+                    axios.get(geocodeUrl).then((response) => {
+                        if (response.data.status == 'ZERO_RESULTS') {
+                            throw new Error('Unable to find that address.');    // move to catch block
+                        }
 
-                    geocoder.geocode(location).then(function (res) {
-                        if (res[0]) {
-                            json[eventLocation] = location;
+                        if (response.data.results[0].geometry && response.statusCode !== 400) {
+                            //console.log('hi')
+                            var latitude = response.data.results[0].geometry.location.lat;
+                            var longitude = response.data.results[0].geometry.location.lng;
+                            //console.log(latitude, " and " , longitude);
+                            //console.log(geocodeUrl);
+                            //console.log(longitude, latitude);
+                             json[eventLocation] = location;
                             //json[eventLocation].push(location);
                             json[eventName] = name;
                             //json[eventName].push(name);
                             json[eventTime] = time;
                             json[eventDetails] = details;
-
-                            var lat = res[0].latitude;
-                            var lng = res[0].longitude;
-                            json[eventLatLng] = { lat: lat, lng: lng };
-
+                            json[eventLatLng] = { lat: latitude, lng: longitude };
                             detailsArray.push(json[eventDetails]);
-                            //console.log('hi');
-                            // console.log(json[eventName]);
-                            // console.log("--------------")
-
+                            //return axios.get(weatherUrl);   //second promise
                         }
-                    })//.then(() => {
+                    })
+
+                    // geocoder.geocode(location).then(function (res) {
+                    //     if (res[0]) {
+                    //         json[eventLocation] = location;
+                    //         //json[eventLocation].push(location);
+                    //         json[eventName] = name;
+                    //         //json[eventName].push(name);
+                    //         json[eventTime] = time;
+                    //         json[eventDetails] = details;
+
+                    //         var lat = res[0].latitude;
+                    //         var lng = res[0].longitude;
+                    //         json[eventLatLng] = { lat: lat, lng: lng };
+
+                    //         detailsArray.push(json[eventDetails]);
+                    //         //console.log('hi');
+                    //         // console.log(json[eventName]);
+                    //         // console.log("--------------")
+
+                    //     }
+                    // })//.then(() => {
                     //     //let i = 0;
 
                     //     request(json[eventDetails], function (error, response, html) {
@@ -287,7 +340,7 @@ io.on(`connection`, (socket) => {
 
             // Optional depending on the providers 
             httpAdapter: 'https', // Default 
-            apiKey: 'AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ', // for Mapquest, OpenCage, Google Premier 
+            apiKey: `${apiKey}`, // for Mapquest, OpenCage, Google Premier 
             formatter: null         // 'gpx', 'string', ... 
         };
         var geocoder = NodeGeocoder(options1);
@@ -297,7 +350,6 @@ io.on(`connection`, (socket) => {
             var lat = res[0].latitude;
             var lng = res[0].longitude;
             addressCoordinates = { lat: lat, lng: lng };
-
         }).then(() => {
             //console.log('hello');
             meetup().get({

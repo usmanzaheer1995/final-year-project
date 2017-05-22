@@ -9,38 +9,68 @@ var fs = require('fs');
 var request = require('request');
 
 var { meetup } = require('../server/utils/meetup');
-var { youtube } = require('../server/utils/youtube');
+//var { youtube } = require('../server/utils/youtube');
 
 var Twit = require('twit');
 
 let options3 = {
-  uri: `https://en.wikipedia.org/wiki/said `,
+  uri: `http://pakistani.pk/category/things-to-do/islamabad-attractions/tag/attractions/landmarks/`,
   transform: function (body) {
     return cheerio.load(body);
   }
 };
 console.log(options3.uri);
+var phrases = [];
 rp(options3)
   .then(function ($) {
-    // Process html like you would with jQuery... 
-    console.log('WIKI');
-    var json1 = {};
-
-    $("table.infobox tr").each(function (tr_index, tr) {
-      var th_text = $(this).find("th").text();
-      var prop_name = th_text.trim().toLowerCase().replace(/[^a-z]/g, " ");
-
-      json1[prop_name] = $(this).find("td").text();
-
-      // if ({ "capital": 1 }[prop_name]) {
-      //     //console.log('Capital: ');
-      //     capital = $(this).find("td").text();
+    console.log('hi');
+    //landmarkName = 'landmark', landmarkLat = 'lat', landmarkLng = 'lng';
+    $('.jrTableGrid.jrDataList.jrResults').find('.jrRow').each(function () {
+      //console.log($(this).find('.jr-listing-outer').find('.jrContentTitle').find('a').text());
+      phrases.push($(this).find('.jr-listing-outer').find('.jrContentTitle').find('a').text());
     });
-    // console.log('scrapping done');
-    socket.emit('returnWikiData', json1);
+  }).then(() => {
+    for (let i = 0; i < phrases.length; ++i) {
+      //console.log(phrases[i]);
+      let abc = encodeURI(phrases[i])
+      let geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${abc}`;
+      //console.log(geocodeUrl);
+      axios.get(geocodeUrl).then((response) => {
+        if (response.data.status == 'ZERO_RESULTS') {
+          throw new Error('Unable to find that address.');    // move to catch block
+        }
+
+        if (response.data.results[0].geometry && response.statusCode !== 400) {
+          console.log('hi')
+          var latitude = response.data.results[0].geometry.location.lat;
+          var longitude = response.data.results[0].geometry.location.lng;
+          //console.log(latitude, " and " , longitude);
+          console.log(geocodeUrl);
+          console.log(longitude, latitude);
+          //return axios.get(weatherUrl);   //second promise
+        }
+      });
+      // geocoder.geocode(phrases[i]).then(function (res) {
+      //   if (res[0] && res.statusCode !== 400) {
+      //     //console.log(phrases[i]);
+      //     //console.log(res[0].latitude, res[0].longitude)
+      //     jsonLandmark[landmarkName] = phrases[i];
+      //     jsonLandmark[landmarkLat] = res[0].latitude;
+      //     jsonLandmark[landmarkLng] = res[0].longitude;
+      //     socket.emit('landmark-data', { jsonLandmark });
+      //     //console.log(typeof json['lat'])
+      //     // json['landmark-position'] = { lat: res[0].latitude, lng: res[0].longitude };
+      //   }
+
+
+
+      // });
+      //console.log(phrases[i]);
+    }
   })
   .catch(function (err) {
     // Crawling failed or Cheerio choked... 
+    console.log(err);
   });
 
 

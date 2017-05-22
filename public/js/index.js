@@ -225,7 +225,7 @@ socket.on('eventsData', function (data) {
     $('#my-events').show();
 });
 socket.on('meetupData', function (data) {
-    //console.log(data);
+    console.log(data);
     myEvents.push(data);
 
 });
