@@ -17,6 +17,29 @@
       margin: 5px;
       font-size: 20px
     }
+
+        table {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #ddd;
+    margin-right: 0px;
+    margin-left: auto;
+    
+}
+
+td {
+    text-align: right;
+    padding: 8px;
+    border: 1px solid #ddd;
+}
+
+tr:nth-child(even) {
+  /*background-color: #f2f2f2;*/
+  background-color:honeydew;
+  color: black;
+  }
+
+
     /* Optional: Makes the sample page fill the window. */
     /*
     html,

@@ -9,72 +9,76 @@ var fs = require('fs');
 var request = require('request');
 
 var { meetup } = require('../server/utils/meetup');
+var { scrapeLandmarks } = require('./landmarks');
 //var { youtube } = require('../server/utils/youtube');
 
 var Twit = require('twit');
+var scrape = {}
+scrape = scrapeLandmarks('islamabad');
 
-var options = {
-  uri: `http://www.myevents.pk/event_loc/islamabad-events/`,
-  transform: function (body) {
-    return cheerio.load(body);
-  }
-};
-console.log(options.uri);
-rp(options)
-  .then(function ($) {
-    // Process html like you would with jQuery... 
 
-    console.log("HERE");
-    $('#cat-listing-holder .listing-container').each(function () {
-      var name = ($(this).find('.listing-container-block-title').children('a').text());
-      // console.log(json[eventName]);
-      //var location = ($(this).find('.listing-container-block-title .listing-container-tagline').clone().children().remove().end().text().replace(/\s+/g, ' ')));
-      var location = ($(this).find('.listing-container-block-title .listing-container-tagline').clone().children().remove().end().text().replace(/\s+/g, ' '))
-      //console.log(location);
-      var time = ($(this).find('.listing-container-rating').find('span').text() + "\n");
+// var options = {
+//   uri: `http://www.myevents.pk/event_loc/islamabad-events/`,
+//   transform: function (body) {
+//     return cheerio.load(body);
+//   }
+// };
+// console.log(options.uri);
+// rp(options)
+//   .then(function ($) {
+//     // Process html like you would with jQuery... 
 
-      var details = ($(this).find('.listing-container-block-title').children('a').attr('href'));
+//     console.log("HERE");
+//     $('#cat-listing-holder .listing-container').each(function () {
+//       var name = ($(this).find('.listing-container-block-title').children('a').text());
+//       // console.log(json[eventName]);
+//       //var location = ($(this).find('.listing-container-block-title .listing-container-tagline').clone().children().remove().end().text().replace(/\s+/g, ' ')));
+//       var location = ($(this).find('.listing-container-block-title .listing-container-tagline').clone().children().remove().end().text().replace(/\s+/g, ' '))
+//       //console.log(location);
+//       var time = ($(this).find('.listing-container-rating').find('span').text() + "\n");
 
-      // var options = {
-      //     provider: 'google',
+//       var details = ($(this).find('.listing-container-block-title').children('a').attr('href'));
 
-      //     // Optional depending on the providers 
-      //     httpAdapter: 'https', // Default 
-      //     apiKey: `${apiKey}`, // for Mapquest, OpenCage, Google Premier 
-      //     formatter: null         // 'gpx', 'string', ... 
-      // };
-      // var geocoder = NodeGeocoder(options);
-      let abc = encodeURI(location)
-      let geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${abc}`;
-      axios.get(geocodeUrl).then((response) => {
-        if (response.data.status == 'ZERO_RESULTS') {
-          throw new Error('Unable to find that address.');    // move to catch block
-        }
+//       // var options = {
+//       //     provider: 'google',
 
-        if (response.data.results[0].geometry && response.statusCode !== 400) {
-          //console.log('hi')
-          var latitude = response.data.results[0].geometry.location.lat;
-          var longitude = response.data.results[0].geometry.location.lng;
-          //console.log(latitude, " and " , longitude);
-          console.log(geocodeUrl);
-          console.log(longitude, latitude);
-          //json[eventLocation] = location;
-          //json[eventLocation].push(location);
-          //json[eventName] = name;
-          //json[eventName].push(name);
-          // json[eventTime] = time;
-          // json[eventDetails] = details;
-          // json[eventLatLng] = { lat: latitude, lng: longitude };
-          // detailsArray.push(json[eventDetails]);
-          //return axios.get(weatherUrl);   //second promise
-        }
-      })
-        .catch(function (err) {
-          console.log(err);
-        });
+//       //     // Optional depending on the providers 
+//       //     httpAdapter: 'https', // Default 
+//       //     apiKey: `${apiKey}`, // for Mapquest, OpenCage, Google Premier 
+//       //     formatter: null         // 'gpx', 'string', ... 
+//       // };
+//       // var geocoder = NodeGeocoder(options);
+//       let abc = encodeURI(location)
+//       let geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${abc}`;
+//       axios.get(geocodeUrl).then((response) => {
+//         if (response.data.status == 'ZERO_RESULTS') {
+//           throw new Error('Unable to find that address.');    // move to catch block
+//         }
 
-    });
-  });
+//         if (response.data.results[0].geometry && response.statusCode !== 400) {
+//           //console.log('hi')
+//           var latitude = response.data.results[0].geometry.location.lat;
+//           var longitude = response.data.results[0].geometry.location.lng;
+//           //console.log(latitude, " and " , longitude);
+//           console.log(geocodeUrl);
+//           console.log(longitude, latitude);
+//           //json[eventLocation] = location;
+//           //json[eventLocation].push(location);
+//           //json[eventName] = name;
+//           //json[eventName].push(name);
+//           // json[eventTime] = time;
+//           // json[eventDetails] = details;
+//           // json[eventLatLng] = { lat: latitude, lng: longitude };
+//           // detailsArray.push(json[eventDetails]);
+//           //return axios.get(weatherUrl);   //second promise
+//         }
+//       })
+//         .catch(function (err) {
+//           console.log(err);
+//         });
+
+//     });
+//   });
 // var T = new Twit({
 //     consumer_key:         'waitH5Em0J6Iu2hVfl2UYOtgN',
 //     consumer_secret:      'E1Dn5NCIWGvMgAEzOfGqbiUQM413wZmXhsAY6QJrMK8VOyPpg6',

@@ -5,7 +5,7 @@
     <title></title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    
+
     <link href="css/style.css" rel="stylesheet">
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
@@ -17,11 +17,11 @@
         apply the skin class to the body tag so the changes take effect.
   -->
     <link rel="stylesheet" href="css/skin-blue.min.css">
-    
+
 </head>
 
 <body>
-    
+
 
 
     <!--<div id="infoButton" type="button"><b>Information</b></div>
@@ -66,96 +66,107 @@
 
     <body class="hold-transition skin-blue sidebar-mini">
 
-    <header class="main-header">
+        <header class="main-header">
 
-        <!-- Logo -->
-        <a href="#" class="logo">
-            <!-- mini logo for sidebar mini 50x50 pixels -->
-            <span class="logo-mini"><b>ATL</b></span>
-            <!-- logo for regular state and mobile devices -->
-            <span class="logo-lg"><b>Interative Atlas</b></span>
-        </a>
+            <!-- Logo -->
+            <a href="#" class="logo">
+                <!-- mini logo for sidebar mini 50x50 pixels -->
+                <span class="logo-mini"><b>ATL</b></span>
+                <!-- logo for regular state and mobile devices -->
+                <span class="logo-lg"><b>Interative Atlas</b></span>
+            </a>
 
-        <!-- Header Navbar -->
-        <nav class="navbar navbar-static-top" role="navigation">
-            <!-- Sidebar toggle button-->
-            <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+            <!-- Header Navbar -->
+            <nav class="navbar navbar-static-top" role="navigation">
+                <!-- Sidebar toggle button-->
+                <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
         <span class="sr-only">Toggle navigation</span>
       </a>
-      <div class="navbar-custom-menu">
-          <button type="button" id="my-events" class="btn btn-primary" style="display:none">Events</button>
-        
-      </div>
-        </nav>
-    </header>
+                <div class="navbar-custom-menu">
+                    <button type="button" id="my-events" class="btn btn-primary" style="display:none">Events</button>
+                </div>
+            </nav>
+        </header>
 
-    <!--........................................................-->
+        <!--........................................................-->
 
-    <aside class="main-sidebar">
-        
-        <!-- sidebar: style can be found in sidebar.less -->
-        <section class="sidebar">
+        <aside class="main-sidebar">
 
-            <!-- search form (Optional) -->
-            <div class="sidebar-form">
-                <div class="input-group">
-                    <!--<input type="text" name="q" class="form-control" placeholder="Search...">-->
-                    <select id="select1" class="form-control">
+            <!-- sidebar: style can be found in sidebar.less -->
+            <section class="sidebar">
+
+                <!-- search form (Optional) -->
+                <div class="sidebar-form">
+                    <div class="input-group">
+                        <!--<input type="text" name="q" class="form-control" placeholder="Search...">-->
+                        <select id="select1" class="form-control">
                         <option value="islamabad">Islamabad</option>
                         <option value="lahore">Lahore</option>
                         <option value="karachi">Karachi</option>
                     </select>
-                    <span class="input-group-btn">
+                        <span class="input-group-btn">
                         <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
                         </button>
                     </span>
+                    </div>
                 </div>
-            </div>
-            <!-- /.search form -->
+                <!-- /.search form -->
 
-            <!-- Sidebar Menu -->
-            <ul class="sidebar-menu">
-                <li class="header">HEADER</li>
-                <!-- Optionally, you can add icons to the links -->
-                <li class="treeview">
-                    <a href="#"><i class="fa fa-link"></i> <span>Information</span>
+                <!-- Sidebar Menu -->
+                <ul class="sidebar-menu">
+                    <li id="progressBar" class="header" style="display:none">Progress: <span id="percentage">0</span>%</li>
+                    <!-- Optionally, you can add icons to the links -->
+                    <li class="treeview">
+                        <a href="#"><i class="fa fa-link"></i> <span>Information</span>
                         <span class="pull-right-container">
                         <i class="fa fa-angle-left pull-right"></i>
                         </span>
                     </a>
-                    <ul id="infoPanel" class="treeview-menu">
+                        <!--<ul id="infoPanel" class="treeview-menu">
 
-                    </ul>
-                </li>
-                <li>
-                    <a href="#"><i class="fa fa-link"></i> <span>Videos</span>
-                        <span class="pull-right-container">
-                        <i class="fa fa-angle-left pull-right"></i>
-                        </span>
-                    </a>
-                    <ul id="panel" class="treeview-menu">
+                    
+                        </ul>-->
 
-                    </ul>
-                </li>
-                <li class="treeview">
-                    <a href="#"><i class="fa fa-link"></i> <span>Blogs/Articles</span>
-                        <span class="pull-right-container">
-                        <i class="fa fa-angle-left pull-right"></i>
-                        </span>
-                    </a>
-                    <ul id="panel1" class="treeview-menu">
+                        <table id="contentTable" class="treeview-menu">
+                            <tr>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </table>
                         
-                    </ul>
-                </li>
-            </ul>
-            <!-- /.sidebar-menu -->
-        </section>
-        <!-- /.sidebar -->
-    </aside>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-link"></i> <span>Videos</span>
+                        <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                        <ul id="panel" class="treeview-menu">
 
-    <div class="content-wrapper">
-        <!-- Content Header (Page header) -->
-        <!--<section class="content-header">
+                        </ul>
+                    </li>
+                    <li class="treeview">
+                        <a href="#"><i class="fa fa-link"></i> <span>Blogs/Articles</span>
+                        <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                        <ul id="panel1" class="treeview-menu">
+
+                        </ul>
+                    </li>
+                </ul>
+                <!-- /.sidebar-menu -->
+            </section>
+            <!-- /.sidebar -->
+        </aside>
+
+
+
+        <div class="content-wrapper">
+
+            <!-- Content Header (Page header) -->
+            <!--<section class="content-header">
             <h1>
                 Page Header
                 <small>Optional description</small>
@@ -163,32 +174,32 @@
             
         </section>-->
 
-        <!-- Main content -->
-        <section class="content">
+            <!-- Main content -->
+            <section class="content">
 
-            <div id="map"></div>
-            <!-- Your Page Content Here -->
+                <div id="map"></div>
+                <!-- Your Page Content Here -->
 
-        </section>
-        <!-- /.content -->
-    </div>
+            </section>
+            <!-- /.content -->
+        </div>
 
-    <!--.........................................................................-->
+        <!--.........................................................................-->
 
-    <!--<div id="map"></div>-->
-    <script src="js/jquery-2.2.3.min.js"></script>
-    <!-- Bootstrap 3.3.6 -->
-    <script src="js/bootstrap.min.js"></script>
-    <!-- AdminLTE App -->
-    <script src="js/app.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="js/libs/moment.js"></script>
-    <!--<script src="js/libs/jquery-3.2.0.min.js"></script>-->
-    <script src="js/index.js"></script>
-    
-    <!--<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ&callback=initMap"></script>-->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ&libraries=places&callback=initMap"
-        async defer></script>
-</body>
+        <!--<div id="map"></div>-->
+        <script src="js/jquery-2.2.3.min.js"></script>
+        <!-- Bootstrap 3.3.6 -->
+        <script src="js/bootstrap.min.js"></script>
+        <!-- AdminLTE App -->
+        <script src="js/app.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="js/libs/moment.js"></script>
+        <!--<script src="js/libs/jquery-3.2.0.min.js"></script>-->
+        <script src="js/index.js"></script>
+
+        <!--<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ&callback=initMap"></script>-->
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ&libraries=places&callback=initMap"
+            async defer></script>
+    </body>
 
 </html>
