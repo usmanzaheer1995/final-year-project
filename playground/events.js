@@ -13,8 +13,11 @@ var { scrapeLandmarks } = require('./landmarks');
 //var { youtube } = require('../server/utils/youtube');
 
 var Twit = require('twit');
-var scrape = {}
-scrape = scrapeLandmarks('islamabad');
+
+scrapeLandmarks('islamabad', function(returnValue){
+  console.log('helloo');
+  console.log(returnValue);
+});
 
 
 // var options = {
