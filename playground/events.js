@@ -9,14 +9,14 @@ var fs = require('fs');
 var request = require('request');
 
 var { meetup } = require('../server/utils/meetup');
-var { scrapeLandmarks } = require('./landmarks');
+var { myEvents } = require('./myevents');
 //var { youtube } = require('../server/utils/youtube');
 
 var Twit = require('twit');
 
-scrapeLandmarks('islamabad', function(returnValue){
-  console.log('helloo');
-  console.log(returnValue);
+myEvents('islamabad', function(json){
+  //console.log(result);
+  console.log(json);
 });
 
 

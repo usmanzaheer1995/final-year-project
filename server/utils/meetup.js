@@ -19,7 +19,7 @@ var meetup = () => {
       }
       //console.log(body);
       callback(JSON.parse(body)['results']);
-    })
+    });
   }
 
 

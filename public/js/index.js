@@ -215,7 +215,7 @@ socket.on('videosData', function (data) {
 
 socket.on('blogsData', function (data) {
 
-    //console.log(data.title);
+    console.log(data.title);
     //console.log(data.link);
 
     //console.log("reached here");
@@ -242,7 +242,6 @@ socket.on('returnWikiData', function (data) {
 });
 
 socket.on('landmark-data', function (data) {
-
     // console.log(data.jsonLandmark.landmark);
     // console.log(data.jsonLandmark.lat, data.jsonLandmark.lng)
 
