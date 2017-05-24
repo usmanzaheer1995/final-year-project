@@ -65,7 +65,7 @@ io.on(`connection`, (socket) => {
     });
 
     socket.on('scrapeBlogs', (address) => {
-        scrapeBlogs('islamabad', function (blogs) {
+        scrapeBlogs(address.address, function (blogs) {
             socket.emit('blogsData', blogs);
         });
     });

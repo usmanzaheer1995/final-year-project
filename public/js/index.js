@@ -114,7 +114,7 @@ function initMap() {
         socket.emit('meetup', { address });
         socket.emit('landmarks', { address });
         socket.emit('scrapeBlogs', { address });
-        socket.emit('videos', { address });
+            socket.emit('videos', { address });
     });
 
 }
@@ -298,12 +298,12 @@ socket.on('landmark-data', function (data) {
                 //console.log(landmarkName);
                 $("#panel").empty();
                 $("#infoPanel").empty();
-                $("#panel1").empty();
+                //$("#panel1").empty();
                 $('#progressBar').fadeIn("slow");
                 $("#contentTable tr").remove();
                 socket.emit('scrapeWiki', { address });
                 socket.emit('videos', { address });
-                socket.emit('scrapeBlogs', { address });
+                //socket.emit('scrapeBlogs', { address });
             }
             else {
                 alert('Geocode was not successful for the following reason: ' + status);
