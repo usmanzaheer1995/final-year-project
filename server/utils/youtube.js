@@ -7,6 +7,7 @@ var scrapeVideos = ((address, callback) => {
     youTube.setKey('AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ');
     youTube.addParam("type", 'video');
     youTube.search(address + " facts", 2, function (error, result) {
+        console.log('facts');
         if (error) {
             console.log(error);
         }
@@ -18,7 +19,7 @@ var scrapeVideos = ((address, callback) => {
         }
     });
     youTube.search(address + " documentary", 2, function (error, result) {
-        console.log('documentary')
+        console.log('documentary');
         if (error) {
             console.log(error);
         }
@@ -29,7 +30,7 @@ var scrapeVideos = ((address, callback) => {
     });
 
     youTube.search(address + " best resturants", 2, function (error, result) {
-        console.log('documentary')
+        console.log('food');
         if (error) {
             console.log(error);
         }

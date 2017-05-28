@@ -5,8 +5,39 @@ const axios = require('axios');
 var NodeGeocoder = require('node-geocoder');
 var cheerio = require('cheerio'); // Basically jQuery for node.js 
 
+var landmarksWiki = ((address, callback) => {
+    address = address.toLowerCase();
+    address = address.replace(/\s/g, '-');
+    var newAddress = encodeURI(address);
+    console.log(newAddress);
+    let options = {
+        uri: `http://pakistani.pk/${newAddress}/`,
+        transform: function (body) {
+            return cheerio.load(body);
+        }
+    };
+    console.log(options.uri);
+    rp(options)
+        .then(function ($) {
+            // Process html like you would with jQuery... 
+            console.log('WIKI');
+            var json1 = {};
+            json1['description'] = $('.jrListingFulltext').children().text();
+
+            //console.log(json1['description']);
+            //socket.emit('returnWikiData', json1);
+            callback(json1);
+        })
+        .catch(function (err) {
+            // Crawling failed or Cheerio choked... 
+            //console.log("Error, not found")
+            let json1 = {};
+            callback(json1);
+        });
+});
+
 var scrapeWiki = ((address, callback) => {
-    
+
     var newAddress = encodeURI(address);
     //console.log(newAddress);
     let options = {
@@ -38,10 +69,14 @@ var scrapeWiki = ((address, callback) => {
         })
         .catch(function (err) {
             // Crawling failed or Cheerio choked... 
+            //console.log("Error, not found")
+            let json1 = {};
+            callback(json1);
         });
 })
 
 module.exports = {
     scrapeWiki,
+    landmarksWiki,
 };
 

@@ -5,7 +5,7 @@ const axios = require('axios');
 var NodeGeocoder = require('node-geocoder');
 var cheerio = require('cheerio'); // Basically jQuery for node.js 
 
-var myEvents = ((address, callback) => {
+var myEvents = ((apiKey, address, callback) => {
     var detailsArray = [];
     var json = {};
     var eventName = "name", eventLocation = "location", eventTime = "time", eventLatLng = "latlng", eventDetails = "details";
@@ -41,59 +41,66 @@ var myEvents = ((address, callback) => {
 
                 var details = ($(this).find('.listing-container-block-title').children('a').attr('href'));
 
-                // var options = {
-                //     provider: 'google',
+                // --------------------AXIOS----------------------------- //
 
-                //     // Optional depending on the providers 
-                //     httpAdapter: 'https', // Default 
-                //     apiKey: `${apiKey}`, // for Mapquest, OpenCage, Google Premier 
-                //     formatter: null         // 'gpx', 'string', ... 
-                // };
-                // var geocoder = NodeGeocoder(options);
-                let abc = encodeURI(location)
-                let geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${abc}`;
-                axios.get(geocodeUrl).then((response) => {
-                    if (response.data.status == 'ZERO_RESULTS') {
-                        throw new Error('Unable to find that address.');    // move to catch block
-                    }
+                // let abc = encodeURI(location)
+                // let geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${abc}`;
+                // axios.get(geocodeUrl).then((response) => {
+                //     if (response.data.status == 'ZERO_RESULTS') {
+                //         throw new Error('Unable to find that address.');    // move to catch block
+                //     }
 
-                    if (response.data.results.length > 0 && response.statusCode !== 400) {
-                        var latitude = response.data.results[0].geometry.location.lat;
-                        var longitude = response.data.results[0].geometry.location.lng;
+                //     if (response.data.results.length > 0 && response.statusCode !== 400) {
+                //         var latitude = response.data.results[0].geometry.location.lat;
+                //         var longitude = response.data.results[0].geometry.location.lng;
 
-                        // console.log(geocodeUrl);
-                        // console.log(longitude, latitude);
-                        json[eventLocation] = location;
-                        //json[eventLocation].push(location);
-                        json[eventName] = name;
-                        //json[eventName].push(name);
-                        json[eventTime] = time;
-                        json[eventDetails] = details;
-                        json[eventLatLng] = { lat: latitude, lng: longitude };
-                        detailsArray.push(json[eventDetails]);
-                    }
-                })
+                //         // console.log(geocodeUrl);
+                //         // console.log(longitude, latitude);
+                //         json[eventLocation] = location;
+                //         //json[eventLocation].push(location);
+                //         json[eventName] = name;
+                //         //json[eventName].push(name);
+                //         json[eventTime] = time;
+                //         json[eventDetails] = details;
+                //         json[eventLatLng] = { lat: latitude, lng: longitude };
+                //         detailsArray.push(json[eventDetails]);
+                //     }
+                // });
+                // --------------------END OF AXIOS----------------------------- //
 
-                    // geocoder.geocode(location).then(function (res) {
-                    //     if (res[0]) {
-                    //         json[eventLocation] = location;
-                    //         //json[eventLocation].push(location);
-                    //         json[eventName] = name;
-                    //         //json[eventName].push(name);
-                    //         json[eventTime] = time;
-                    //         json[eventDetails] = details;
 
-                    //         var lat = res[0].latitude;
-                    //         var lng = res[0].longitude;
-                    //         json[eventLatLng] = { lat: lat, lng: lng };
+                // --------------------NODE-GEOCODER---------------------------- //
 
-                    //         detailsArray.push(json[eventDetails]);
-                    //         //console.log('hi');
-                    //         // console.log(json[eventName]);
-                    //         // console.log("--------------")
+                var options = {
+                    provider: 'google',
 
-                    //     }
-                    // })//.then(() => {
+                    // Optional depending on the providers 
+                    httpAdapter: 'https', // Default 
+                    apiKey: `${apiKey}`, // for Mapquest, OpenCage, Google Premier 
+                    formatter: null         // 'gpx', 'string', ... 
+                };
+                var geocoder = NodeGeocoder(options);
+
+                    geocoder.geocode(location).then(function (res) {
+                        if (res[0]) {
+                            json[eventLocation] = location;
+                            //json[eventLocation].push(location);
+                            json[eventName] = name;
+                            //json[eventName].push(name);
+                            json[eventTime] = time;
+                            json[eventDetails] = details;
+
+                            var lat = res[0].latitude;
+                            var lng = res[0].longitude;
+                            json[eventLatLng] = { lat: lat, lng: lng };
+
+                            detailsArray.push(json[eventDetails]);
+                            //console.log('hi');
+                            // console.log(json[eventName]);
+                            // console.log("--------------")
+
+                        }
+                     })//.then(() => {
                     //     //let i = 0;
 
                     //     request(json[eventDetails], function (error, response, html) {
@@ -103,7 +110,10 @@ var myEvents = ((address, callback) => {
                     //             console.log($('.item-block-content').find('p').eq(1).text());
                     //         }
                     //     });
-                    /*})*/.then(() => {
+                    /*})*/
+                    // --------------------END OFNODE-GEOCODER---------------------------- //
+
+                    .then(() => {
                         callback(json);
                         // console.log(name + " emitted");
                     })

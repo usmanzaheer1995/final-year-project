@@ -26,7 +26,7 @@ const port = process.env.PORT || 3000;
 var { scrapeMeetup } = require('./utils/scrapeMeetup');
 var { scrapeLandmarks } = require('../server/utils/landmarks');
 var { scrapeBlogs } = require('../server/utils/blogs');
-var { scrapeWiki } = require('../server/utils/wiki');
+var { scrapeWiki, landmarksWiki } = require('../server/utils/wiki');
 var { scrapeVideos } = require('../server/utils/youtube');
 var { myEvents } = require('../server/utils/myevents');
 
@@ -42,10 +42,21 @@ io.on(`connection`, (socket) => {
 
     console.log('new user connection');
 
+    socket.on('landmarks-wiki', (address) => {
+        //console.log(address.address);
+        landmarksWiki(address.address, function (json1) {
+            // let size = Object.keys(json1).length;
+            // console.log(size);
+            // console.log(json1);
+            socket.emit('returnWikiData', json1);
+        });
+    });
+
     socket.on('scrapeWiki', (address) => {
 
         scrapeWiki(address.address, function (json1) {
-            //console.log(json1);
+            //let size = Object.keys(json1).length;
+            //console.log(size);
             socket.emit('returnWikiData', json1);
         });
 
@@ -59,7 +70,7 @@ io.on(`connection`, (socket) => {
     });
 
     socket.on('landmarks', (address) => {
-        scrapeLandmarks(address.address, function (jsonLandmark) {
+        scrapeLandmarks(apiKey,address.address, function (jsonLandmark) {
             socket.emit('landmark-data', { jsonLandmark });
         });
     });
@@ -71,13 +82,13 @@ io.on(`connection`, (socket) => {
     });
 
     socket.on('myEvents', (address) => {
-        myEvents(address.address, function (json) {
+        myEvents(apiKey,address.address, function (json) {
             //console.log(json);
             socket.emit("eventsData", json);
         });
     });
     socket.on('meetup', (address) => {
-        scrapeMeetup(apiKey ,address.address, function (json) {
+        scrapeMeetup(apiKey, address.address, function (json) {
             //console.log(json);
             socket.emit('meetupData', json);
         });

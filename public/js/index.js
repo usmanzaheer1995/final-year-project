@@ -11,7 +11,7 @@ var findLandmark = 0;
 
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 12,
+        zoom: 5,
         center: { lat: 30.3753, lng: 69.3451 },
         styles: [
             { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
@@ -97,7 +97,7 @@ function initMap() {
     geocoder = new google.maps.Geocoder();
 
     document.getElementById('search-btn').addEventListener('click', function () {
-
+        //map.zoom = 12;
         findLandmark = 0;
         $('#my-events').fadeOut("slow");
         $('#progressBar').fadeOut("fast");
@@ -107,14 +107,14 @@ function initMap() {
         $("#panel").empty();
         $("#panel1").empty();
         address = $('#select1').val();
-        geocodeAddress(address);        
+        geocodeAddress(address);
         getCurrentLocation();
         socket.emit('scrapeWiki', { address });
         socket.emit('myEvents', { address });
         socket.emit('meetup', { address });
         socket.emit('landmarks', { address });
         socket.emit('scrapeBlogs', { address });
-            socket.emit('videos', { address });
+        socket.emit('videos', { address });
     });
 
 }
@@ -131,7 +131,7 @@ function getCurrentLocation() {
     }
 }
 function showPosition(position) {
-    console.log(position.coords.latitude, position.coords.longitude);
+    //console.log(position.coords.latitude, position.coords.longitude);
 
     var latLng = { lat: position.coords.latitude, lng: position.coords.longitude };
     //map.setCenter(latLng);
@@ -162,7 +162,12 @@ function showWikiDetails(arrayIndex, array) {
         var cell1 = row.insertCell(0);
         var cell2 = row.insertCell(1);
         cell1.innerHTML = '<strong>' + arrayIndex[x].charAt(0).toUpperCase() + arrayIndex[x].slice(1); +'<strong>';
-        cell2.innerHTML = array[x];
+
+        //add new line to column after every 80 characters
+        cell2.innerHTML = array[x].replace(/(.{80})/g, "$1<br>");   //shukria stackoverflow
+
+        //$("#infoPanel").append('<li><strong>' + arrayIndex[x]  + ': ' + array[x] + '</li>');
+
     }
     var a = parseInt($('#percentage').text());
     a = a + 10;
@@ -210,12 +215,12 @@ socket.on('videosData', function (data) {
 
     a = a + 5;
     $('#percentage').text(a);
-    
+
 });
 
 socket.on('blogsData', function (data) {
 
-    console.log(data.title);
+    //console.log(data.title);
     //console.log(data.link);
 
     //console.log("reached here");
@@ -230,14 +235,21 @@ socket.on('blogsData', function (data) {
 
 socket.on('returnWikiData', function (data) {
     //console.log('wiki data');
-    var arrayIndex = $.map(data, function (value, index) {
-        return [index];
-    });
-    var array = $.map(data, function (value, index) {
-        return [value];
-    });
+    let size = Object.keys(data).length;
+    //console.log(size);
+    if (size === 0) {
+        socket.emit('landmarks-wiki', { address });
+    }
+    else {
+        var arrayIndex = $.map(data, function (value, index) {
+            return [index];
+        });
+        var array = $.map(data, function (value, index) {
+            return [value];
+        });
 
-    showWikiDetails(arrayIndex, array);
+        showWikiDetails(arrayIndex, array);
+    }
 
 });
 
@@ -334,7 +346,7 @@ function deleteMarkers() {
 
 var myEventsClicked = false;
 document.getElementById('my-events').addEventListener('click', function () {
-    //alert('clicked');
+
     if (myEventsClicked === false) {
         myEventsClicked = true;
         for (let i = 0; i < myEvents.length; ++i) {
@@ -387,10 +399,11 @@ document.getElementById('my-events').addEventListener('click', function () {
 
 socket.on('eventsData', function (data) {
     //console.log("BACK");
+    //let size = Object.keys(myEvents).length;
 
     myEvents.push(data);
     var a = parseInt($('#percentage').text());
-    console.log(a)
+    console.log(a);
     a = a + 1;
     $('#percentage').text(a);
 
@@ -438,7 +451,7 @@ function geocodeAddress(address) {
 
         if (status === 'OK') {
             map.setCenter(results[0].geometry.location);
-            //map.zoom = 12;
+            map.setZoom(12);
             var marker = new google.maps.Marker({
                 map: map,
                 position: results[0].geometry.location

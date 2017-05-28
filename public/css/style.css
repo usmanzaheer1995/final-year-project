@@ -7,8 +7,22 @@
       color: white;
       
     }
+
+    #progressBar {
+        display:none;
+        color: white;
+        font-size: 25px;
+    }
+
     ul {
       overflow-x: scroll;
+    }
+
+    table td { 
+        overflow-x: scroll; 
+    }
+    ::-webkit-scrollbar {
+        display: none;
     }
 
     #my-events{
