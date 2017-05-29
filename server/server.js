@@ -1,10 +1,4 @@
-/*  Google Maps API keys
-
-    Usman: AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ
-    Sheikh: AIzaSyCBE2UkT6mcn3qxK6ip9IEaHQs26EsyKTg
-
-*/
-const apiKey = 'AIzaSyCBE2UkT6mcn3qxK6ip9IEaHQs26EsyKTg';
+const apiKey = 'AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ';
 
 const path = require('path');
 const http = require('http');

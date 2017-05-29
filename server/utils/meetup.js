@@ -2,7 +2,7 @@ var fs = require('fs');
 var request = require('request');
 
 var meetup = () => {
-  var key = fs.readFileSync('api_key.txt', 'utf-8');
+  var key = fs.readFileSync('./server/utils/api_key.txt', 'utf-8');
   var url = "https://api.meetup.com";
   //console.log(key);
   var composeURL = function (root, object) {
@@ -11,7 +11,7 @@ var meetup = () => {
 
   var get = function (params, callback, path) {
     params.key = key;
-
+    //console.log(params);
     request.get(composeURL(url + (path || '/2/open_events'), params), function (err, res, body) {
       if (err) {
         console.error(err);
@@ -75,7 +75,7 @@ var meetup = () => {
   };
 
   var parseEvents = function (results) {
-    //console.log(results.length);
+    //console.log(results);
     var list = [];
     for (var i = 0; i < results.length; i++) {
       var list2 = parseEvent(results[i]);

@@ -1,1 +1,5 @@
-5411712464d53507cc42283b403c
+Google Maps API keys
+
+    Usman: AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ
+    Sheikh: AIzaSyCBE2UkT6mcn3qxK6ip9IEaHQs26EsyKTg     //current
+
