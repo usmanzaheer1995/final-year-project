@@ -1,3 +1,11 @@
+/*
+Google Maps API keys
+
+    Usman: AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ  //current
+    Sheikh: AIzaSyCBE2UkT6mcn3qxK6ip9IEaHQs26EsyKTg     
+
+*/
+
 const apiKey = 'AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ';
 
 const path = require('path');
