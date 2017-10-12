@@ -42,7 +42,7 @@ io.on(`connection`, socket => {
     scrapeWiki(address.address, function(json1) {
       //let size = Object.keys(json1).length;
       //console.log(size);
-      socket.emit('returnWikiData', json1);
+      if (json1) socket.emit('returnWikiData', json1);
     });
   });
 

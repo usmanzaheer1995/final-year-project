@@ -22,13 +22,20 @@ var karachiArray = [];
 // Start a simple rotation animation
 var before = null;
 var animated = false;
+var dontAllowTimeElapse = false;
 
 function performAnimation() {
   requestAnimationFrame(function animate(now) {
     var c = earth.getPosition();
     var elapsed = before ? now - before : 0;
 
-    if (animated) elapsed = 0;
+    if (animated) {
+      elapsed = 0;
+      return;
+    }
+    if (dontAllowTimeElapse) {
+      elapsed = 0;
+    }
     before = now;
     earth.setCenter([c[0], c[1] + 0.1 * (elapsed / 30)]);
     dontAllowTimeElapse = false;
@@ -38,6 +45,7 @@ function performAnimation() {
 var a = document.getElementById('logo');
 a.onclick = function() {
   animated = !animated;
+  dontAllowTimeElapse = true;
   performAnimation();
   return false;
 };
@@ -61,6 +69,8 @@ function initialize() {
   earth = new WE.map('earth_div', {
     center: [30.3753, 69.3451],
     zoom: 2,
+    dragging: true,
+    scrollWheelZoom: true,
     proxyHost: 'https://srtm.webglearth.com/cgi-bin/corsproxy.fcgi?url='
   });
   //earth.setView([30.3753, 69.3451], 3);
@@ -133,6 +143,10 @@ function removeMarker(e) {
   marker.removeFrom(earth);
 }
 
+function panTo(coords) {
+  earth.panTo(coords);
+}
+
 function zoomIn(e) {
   earth.setZoom(5);
   //marker.removeFrom(earth);
@@ -178,14 +192,14 @@ document.getElementById('search-btn').addEventListener('click', function() {
   $('#panel1').empty();
   address = $('#select1').val();
   geocodeAddress(address);
-  // socket.emit('scrapeWiki', { address });
+  socket.emit('scrapeWiki', { address });
   // socket.emit('scrapeBlogs', { address });
-  //socket.emit('videos', { address });
+  // socket.emit('videos', { address });
 
   // socket.emit('myEvents', { address });
   // socket.emit('meetup', { address });
   // socket.emit('allEvents', { address });
-  // socket.emit('landmarks', { address });
+  socket.emit('landmarks', { address });
 });
 
 function geocodeAddress(address) {
@@ -195,13 +209,19 @@ function geocodeAddress(address) {
       //map.setCenter(results[0].geometry.location);
       //map.setZoom(12);
       //console.log(results[0].geometry.location.lat());
-      earth.setView(
-        [
-          results[0].geometry.location.lat(),
-          results[0].geometry.location.lng()
-        ],
-        14
-      );
+      // earth.setView(
+      //   [
+      //     results[0].geometry.location.lat(),
+      //     results[0].geometry.location.lng()
+      //   ],
+      //   14
+      // );
+      //console.log(results[0].geometry.location.lat());
+      earth.setZoom(13);
+      earth.panTo([
+        results[0].geometry.location.lat(),
+        results[0].geometry.location.lng()
+      ]);
       var cityMarker = WE.marker([
         results[0].geometry.location.lat(),
         results[0].geometry.location.lng()
@@ -288,11 +308,12 @@ function showWikiDetails(arrayIndex, array) {
 }
 socket.on('returnWikiData', function(data) {
   //console.log('wiki data');
-  let size = Object.keys(data).length;
+  let size = null;
+  if (data) size = Object.keys(data).length;
   //console.log(size);
   if (size === 0) {
     socket.emit('landmarks-wiki', { address });
-  } else {
+  } else if (size) {
     var arrayIndex = $.map(data, function(value, index) {
       return [index];
     });
@@ -504,27 +525,27 @@ function showWikiDetails(arrayIndex, array) {
   //     /*-------------------------------------------------------
   //     ------------------------------------------------------------*/
 }
-socket.on('videosData', function(data) {
-  var size = Object.keys(data.items).length;
-  console.log(size);
+// socket.on('videosData', function(data) {
+//   var size = Object.keys(data.items).length;
+//   console.log(size);
 
-  for (let i = 0; i < size; ++i) {
-    console.log(data.items[i].snippet.title);
-    $('#panel').append(
-      '<li><a href="https://www.youtube.com/embed/' +
-        data.items[i].id.videoId +
-        '?enablejsapi=1" target="_blank"><span class="tab">' +
-        data.items[i].snippet.title +
-        '</span></a></li>'
-    );
-    //$("#videos-names-list").append('<li><a href="https://www.youtube.com/embed/' + data.items[i].id.videoId + '?enablejsapi=1" target="_blank"><span class="tab">' + data.items[i].snippet.title + '</span></a></li>');
-  }
+//   for (let i = 0; i < size; ++i) {
+//     console.log(data.items[i].snippet.title);
+//     $('#panel').append(
+//       '<li><a href="https://www.youtube.com/embed/' +
+//         data.items[i].id.videoId +
+//         '?enablejsapi=1" target="_blank"><span class="tab">' +
+//         data.items[i].snippet.title +
+//         '</span></a></li>'
+//     );
+//     //$("#videos-names-list").append('<li><a href="https://www.youtube.com/embed/' + data.items[i].id.videoId + '?enablejsapi=1" target="_blank"><span class="tab">' + data.items[i].snippet.title + '</span></a></li>');
+//   }
 
-  var a = parseInt($('#percentage').text());
+//   var a = parseInt($('#percentage').text());
 
-  a = a + 5;
-  $('#percentage').text(a);
-});
+//   a = a + 5;
+//   $('#percentage').text(a);
+// });
 
 // socket.on('blogsData', function (data) {
 
@@ -537,23 +558,23 @@ socket.on('videosData', function(data) {
 //     a = a + 1;
 
 // });
-socket.on('returnWikiData', function(data) {
-  //console.log('wiki data');
-  let size = Object.keys(data).length;
-  //     //console.log(size);
-  if (size === 0) {
-    socket.emit('landmarks-wiki', { address });
-  } else {
-    var arrayIndex = $.map(data, function(value, index) {
-      return [index];
-    });
-    var array = $.map(data, function(value, index) {
-      return [value];
-    });
+// socket.on('returnWikiData', function(data) {
+//   //console.log('wiki data');
+//   let size = Object.keys(data).length;
+//   //     //console.log(size);
+//   if (size === 0) {
+//     socket.emit('landmarks-wiki', { address });
+//   } else {
+//     var arrayIndex = $.map(data, function(value, index) {
+//       return [index];
+//     });
+//     var array = $.map(data, function(value, index) {
+//       return [value];
+//     });
 
-    showWikiDetails(arrayIndex, array);
-  }
-});
+//     showWikiDetails(arrayIndex, array);
+//   }
+// });
 
 socket.on('landmark-data', function(data) {
   //console.log(data);

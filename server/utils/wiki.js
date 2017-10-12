@@ -11,7 +11,7 @@ var landmarksWiki = (address, callback) => {
   var newAddress = encodeURI(address);
   console.log(newAddress);
   let options = {
-    uri: `http://pakistani.pk/category/things-to-do/${newAddress}-attractions/tag/attractions/landmarks/`,
+    uri: `http://pakistani.pk/${newAddress}/`,
     transform: function(body) {
       return cheerio.load(body);
     }
