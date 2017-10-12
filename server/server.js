@@ -6,23 +6,16 @@ const express = require('express');
 const socketIO = require('socket.io');
 const hbs = require('hbs');
 
-const publicPath = path.join(__dirname, '../public');
-const port = process.env.PORT || 3000;
-
-// const axios = require('axios');
-// const rp = require('request-promise');
-// const request = require('request');
-// var NodeGeocoder = require('node-geocoder');
-// var YouTube = require('youtube-node');
-// var striptags = require('striptags');
-// var cheerio = require('cheerio'); // Basically jQuery for node.js 
-
 var { scrapeMeetup } = require('./utils/scrapeMeetup');
 var { scrapeLandmarks } = require('../server/utils/landmarks');
 var { scrapeBlogs } = require('../server/utils/blogs');
 var { scrapeWiki, landmarksWiki } = require('../server/utils/wiki');
 var { scrapeVideos } = require('../server/utils/youtube');
 var { myEvents } = require('../server/utils/myevents');
+var { allEvents } = require('../server/utils/allevents');
+
+const publicPath = path.join(__dirname, '../public');
+const port = process.env.PORT || 3000;
 
 var app = express();
 app.set('view engine', 'hbs');
@@ -32,62 +25,82 @@ var io = socketIO(server);
 app.use(express.static(publicPath));
 //console.log(port);
 
-io.on(`connection`, (socket) => {
+io.on(`connection`, socket => {
+  console.log('new user connection');
 
-    console.log('new user connection');
-
-    socket.on('landmarks-wiki', (address) => {
-        //console.log(address.address);
-        landmarksWiki(address.address, function (json1) {
-            // let size = Object.keys(json1).length;
-            // console.log(size);
-            // console.log(json1);
-            socket.emit('returnWikiData', json1);
-        });
+  socket.on('landmarks-wiki', address => {
+    //console.log(address.address);
+    landmarksWiki(address.address, function(json1) {
+      // let size = Object.keys(json1).length;
+      // console.log(size);
+      // console.log(json1);
+      socket.emit('returnWikiData', json1);
     });
+  });
 
-    socket.on('scrapeWiki', (address) => {
-
-        scrapeWiki(address.address, function (json1) {
-            //let size = Object.keys(json1).length;
-            //console.log(size);
-            socket.emit('returnWikiData', json1);
-        });
-
+  socket.on('scrapeWiki', address => {
+    scrapeWiki(address.address, function(json1) {
+      //let size = Object.keys(json1).length;
+      //console.log(size);
+      socket.emit('returnWikiData', json1);
     });
+  });
 
-    socket.on('videos', (address) => {
-        scrapeVideos(address.address, function (result) {
-            //console.log(json1);
-            socket.emit('videosData', result);
-        });
+  socket.on('videos', address => {
+    scrapeVideos(address.address, function(result) {
+      //console.log(json1);
+      socket.emit('videosData', result);
     });
+  });
 
-    socket.on('landmarks', (address) => {
-        scrapeLandmarks(apiKey,address.address, function (jsonLandmark) {
-            socket.emit('landmark-data', { jsonLandmark });
-        });
+  socket.on('landmarks', address => {
+    scrapeLandmarks(apiKey, address.address, function(jsonLandmark) {
+      if (jsonLandmark) {
+        //console.log(jsonLandmark);
+        socket.emit('landmark-data', { jsonLandmark });
+      }
     });
+  });
 
-    socket.on('scrapeBlogs', (address) => {
-        scrapeBlogs(address.address, function (blogs) {
-            socket.emit('blogsData', blogs);
-        });
+  socket.on('scrapeBlogs', address => {
+    scrapeBlogs(address.address, function(blogs) {
+      socket.emit('blogsData', blogs);
     });
+  });
 
-    socket.on('myEvents', (address) => {
-        myEvents(apiKey,address.address, function (json) {
-            //console.log(json);
-            socket.emit("eventsData", json);
-        });
+  socket.on('myEvents', address => {
+    myEvents(apiKey, address.address, function(json) {
+      //console.log(json);
+      if (json) socket.emit('eventsData', json);
     });
-    socket.on('meetup', (address) => {
-        scrapeMeetup(apiKey, address.address, function (json) {
-            //console.log(json);
-            socket.emit('meetupData', json);
-        });
-    });
+  });
 
+  function checkIfNameExists(arr, newName) {
+    return arr.some(function(e) {
+      return e.name === newName;
+    });
+  }
+  socket.on('allEvents', address => {
+    //let eventsArray = [];
+    allEvents(apiKey, address.address, function(json) {
+      // if (eventsArray.length < 1 && json) {
+      //   eventsArray.push(json);
+      // }
+      // if (json && !checkIfNameExists(eventsArray, json.name)) {
+      //   eventsArray.push(json);
+      // }
+
+      // if (myEvents.length > 0) console.log(eventsArray);
+      if (json) socket.emit('allEventsData', json);
+    });
+  });
+
+  socket.on('meetup', address => {
+    scrapeMeetup(apiKey, address.address, function(json) {
+      //console.log(json);
+      if (json) socket.emit('meetupData', json);
+    });
+  });
 });
 // app.get('/youtube/:id', (request, response) => {
 //     var id = request.params.id;
@@ -99,5 +112,5 @@ io.on(`connection`, (socket) => {
 // });
 
 server.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
+  console.log(`Server listening on port ${port}`);
 });

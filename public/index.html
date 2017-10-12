@@ -2,7 +2,13 @@
 <html lang="en">
 
 <head>
-    <title></title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js" integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+        crossorigin=""></script>
+    <script src="http://www.webglearth.com/v2/api.js"></script>
+
+    <title>Interative Atlas</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
@@ -18,9 +24,11 @@
   -->
     <link rel="stylesheet" href="css/skin-blue.min.css">
 
+
+
 </head>
 
-<body>
+<body onload="initialize()">
 
 
 
@@ -69,19 +77,23 @@
         <header class="main-header">
 
             <!-- Logo -->
-            <a href="#" class="logo">
+            <a href="#" class="logo" id="logo">
                 <!-- mini logo for sidebar mini 50x50 pixels -->
-                <span class="logo-mini"><b>ATL</b></span>
+                <span class="logo-mini">
+                    <b>ATL</b>
+                </span>
                 <!-- logo for regular state and mobile devices -->
-                <span class="logo-lg"><b>Interative Atlas</b></span>
+                <span class="logo-lg">
+                    <b>Interative Atlas</b>
+                </span>
             </a>
 
             <!-- Header Navbar -->
             <nav class="navbar navbar-static-top" role="navigation">
                 <!-- Sidebar toggle button-->
                 <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
-        <span class="sr-only">Toggle navigation</span>
-      </a>
+                    <span class="sr-only">Toggle navigation</span>
+                </a>
                 <div class="navbar-custom-menu">
                     <button type="button" id="my-events" class="btn btn-primary" style="display:none">Events</button>
                 </div>
@@ -100,28 +112,34 @@
                     <div class="input-group">
                         <!--<input type="text" name="q" class="form-control" placeholder="Search...">-->
                         <select id="select1" class="form-control">
-                        <option value="islamabad">Islamabad</option>
-                        <option value="lahore">Lahore</option>
-                        <option value="karachi">Karachi</option>
-                    </select>
+                            <option value="islamabad">Islamabad</option>
+                            <option value="lahore">Lahore</option>
+                            <option value="karachi">Karachi</option>
+                        </select>
                         <span class="input-group-btn">
-                        <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
-                        </button>
-                    </span>
+                            <button type="submit" name="search" id="search-btn" class="btn btn-flat">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </span>
                     </div>
                 </div>
                 <!-- /.search form -->
 
                 <!-- Sidebar Menu -->
                 <ul class="sidebar-menu">
-                    <li id="progressBar" class="header"><strong>Progress <span id="percentage">0</span>%</strong></li>
+                    <li id="progressBar" class="header">
+                        <strong>Progress
+                            <span id="percentage">0</span>%</strong>
+                    </li>
                     <!-- Optionally, you can add icons to the links -->
                     <li class="treeview">
-                        <a href="#"><i class="fa fa-link"></i> <span>Information</span>
-                        <span class="pull-right-container">
-                        <i class="fa fa-angle-left pull-right"></i>
-                        </span>
-                    </a>
+                        <a href="#">
+                            <i class="fa fa-link"></i>
+                            <span>Information</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
                         <!--<ul id="infoPanel" class="treeview-menu">
 
                     
@@ -138,21 +156,25 @@
 
                     </li>
                     <li>
-                        <a href="#"><i class="fa fa-link"></i> <span>Videos</span>
-                        <span class="pull-right-container">
-                        <i class="fa fa-angle-left pull-right"></i>
-                        </span>
-                    </a>
+                        <a href="#">
+                            <i class="fa fa-link"></i>
+                            <span>Videos</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
                         <ul id="panel" class="treeview-menu">
 
                         </ul>
                     </li>
                     <li class="treeview">
-                        <a href="#"><i class="fa fa-link"></i> <span>Blogs/Articles</span>
-                        <span class="pull-right-container">
-                        <i class="fa fa-angle-left pull-right"></i>
-                        </span>
-                    </a>
+                        <a href="#">
+                            <i class="fa fa-link"></i>
+                            <span>Blogs/Articles</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
                         <ul id="panel1" class="treeview-menu">
 
                         </ul>
@@ -179,13 +201,15 @@
             <!-- Main content -->
             <section class="content">
 
-                <div id="map"></div>
+                <!-- <div id="map"></div> -->
+                <div id="earth_div"></div>
+
                 <!-- Your Page Content Here -->
 
             </section>
             <!-- /.content -->
         </div>
-
+        <div id="map"></div>
         <!--.........................................................................-->
 
         <!--<div id="map"></div>-->
@@ -199,9 +223,10 @@
         <!--<script src="js/libs/jquery-3.2.0.min.js"></script>-->
         <script src="js/index.js"></script>
 
-        <!--<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ&callback=initMap"></script>-->
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ&libraries=places&callback=initMap"
-            async defer></script>
+        <!-- <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ&callback=initMap"></script> -->
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ&libraries=places" async
+            defer></script>
+        <script src="https://apis.google.com/js/api.js" type="text/javascript"></script>
     </body>
 
 </html>

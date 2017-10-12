@@ -17,6 +17,7 @@
     "cheerio": "^0.22.0",
     "express": "^4.15.2",
     "fs": "0.0.1-security",
+    "googleplaces": "^0.6.1",
     "hbs": "^4.0.1",
     "http": "0.0.0",
     "node-geocoder": "^3.16.0",
