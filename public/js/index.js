@@ -193,12 +193,12 @@ document.getElementById('search-btn').addEventListener('click', function() {
   address = $('#select1').val();
   geocodeAddress(address);
   socket.emit('scrapeWiki', { address });
-  // socket.emit('scrapeBlogs', { address });
-  // socket.emit('videos', { address });
+  socket.emit('scrapeBlogs', { address });
+  socket.emit('videos', { address });
 
-  // socket.emit('myEvents', { address });
-  // socket.emit('meetup', { address });
-  // socket.emit('allEvents', { address });
+  socket.emit('myEvents', { address });
+  socket.emit('meetup', { address });
+  socket.emit('allEvents', { address });
   socket.emit('landmarks', { address });
 });
 
