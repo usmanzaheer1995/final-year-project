@@ -63,7 +63,8 @@ function initialize() {
   var baselayer = WE.tileLayer(
     'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
-      attribution: '© OpenStreetMap contributors'
+      attribution: '© OpenStreetMap contributors',
+      tileOptions: { crossOriginKeyword: 'anonymous' }
     }
   ).addTo(earth);
 
