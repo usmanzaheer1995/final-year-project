@@ -57,7 +57,7 @@ function initialize() {
   earth = new WE.map('earth_div', {
     center: [30.3753, 69.3451],
     zoom: 2,
-    proxyHost: 'http://srtm.webglearth.com/cgi-bin/corsproxy.fcgi?url='
+    proxyHost: 'https://srtm.webglearth.com/cgi-bin/corsproxy.fcgi?url='
   });
   //earth.setView([30.3753, 69.3451], 3);
   var baselayer = WE.tileLayer(
@@ -172,14 +172,14 @@ document.getElementById('search-btn').addEventListener('click', function() {
   $('#panel1').empty();
   address = $('#select1').val();
   geocodeAddress(address);
-  // socket.emit('scrapeWiki', { address });
-  // socket.emit('scrapeBlogs', { address });
-  // socket.emit('videos', { address });
+  socket.emit('scrapeWiki', { address });
+  socket.emit('scrapeBlogs', { address });
+  socket.emit('videos', { address });
 
-  // socket.emit('myEvents', { address });
-  // socket.emit('meetup', { address });
-  // socket.emit('allEvents', { address });
-  // socket.emit('landmarks', { address });
+  socket.emit('myEvents', { address });
+  socket.emit('meetup', { address });
+  socket.emit('allEvents', { address });
+  socket.emit('landmarks', { address });
 });
 
 function geocodeAddress(address) {
