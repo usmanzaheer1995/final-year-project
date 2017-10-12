@@ -15,6 +15,10 @@ var inforwindowLandmark;
 var findLandmark = 0;
 var animated = true;
 
+var islamabadArray = [];
+var lahoreArray = [];
+var karachiArray = [];
+
 // Start a simple rotation animation
 var before = null;
 var animated = false;
@@ -39,20 +43,20 @@ a.onclick = function() {
 };
 
 function initialize() {
-  var pyrmont = new google.maps.LatLng(24.8615, 67.0099);
-  var request = {
-    location: pyrmont,
-    radius: '500',
-    type: ['embassy']
-  };
-  var map = new google.maps.Map(document.getElementById('map'), {
-    center: pyrmont,
-    zoom: 15
-  });
-  var service;
-  service = new google.maps.places.PlacesService(map);
-  service.nearbySearch(request, callback);
-
+  // var pyrmont = new google.maps.LatLng(33.7294, 73.0931);
+  // var request = {
+  //   location: pyrmont,
+  //   radius: '500',
+  //   type: ['school']
+  // };
+  // var map = new google.maps.Map(document.getElementById('map'), {
+  //   center: pyrmont,
+  //   zoom: 15
+  // });
+  // var service;
+  // service = new google.maps.places.PlacesService(map);
+  // service.nearbySearch(request, callback);
+  // map = null;
   geocoder = new google.maps.Geocoder();
   earth = new WE.map('earth_div', {
     center: [30.3753, 69.3451],
@@ -61,10 +65,9 @@ function initialize() {
   });
   //earth.setView([30.3753, 69.3451], 3);
   var baselayer = WE.tileLayer(
-    'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
-      attribution: '© OpenStreetMap contributors',
-      tileOptions: { crossOriginKeyword: 'anonymous' }
+      attribution: '© OpenStreetMap contributors'
     }
   ).addTo(earth);
 
@@ -115,8 +118,8 @@ var showInfo = function(e) {
     }
   );
 
-  marker.on('mouseover', mouseOverMarker);
-  marker.on('mouseout', mouseOutMarker);
+  // marker.on('mouseover', mouseOverMarker);
+  // marker.on('mouseout', mouseOutMarker);
 
   marker.on('click', zoomIn);
   //marker.on('dblclick', removeMarker);
@@ -162,6 +165,8 @@ function geocodeLatLng(geocoder, map, latlng) {
 }
 
 document.getElementById('search-btn').addEventListener('click', function() {
+  animated = true;
+  performAnimation();
   //map.zoom = 12;
   findLandmark = 0;
   $('#my-events').fadeOut('slow');
@@ -173,14 +178,14 @@ document.getElementById('search-btn').addEventListener('click', function() {
   $('#panel1').empty();
   address = $('#select1').val();
   geocodeAddress(address);
-  socket.emit('scrapeWiki', { address });
-  socket.emit('scrapeBlogs', { address });
-  socket.emit('videos', { address });
+  // socket.emit('scrapeWiki', { address });
+  // socket.emit('scrapeBlogs', { address });
+  //socket.emit('videos', { address });
 
-  socket.emit('myEvents', { address });
-  socket.emit('meetup', { address });
-  socket.emit('allEvents', { address });
-  socket.emit('landmarks', { address });
+  // socket.emit('myEvents', { address });
+  // socket.emit('meetup', { address });
+  // socket.emit('allEvents', { address });
+  // socket.emit('landmarks', { address });
 });
 
 function geocodeAddress(address) {
@@ -342,15 +347,20 @@ document.getElementById('my-events').addEventListener('click', function() {
       //console.log(myEvents[i].location);
       var flag = false;
       for (let index = 0; index < locations.length; ++index) {
-        if (locations[index] === myEvents[i].location) {
+        if (
+          locations[index] === myEvents[i].location &&
+          eventData[index].indexOf(myEvents[i].name) < 0
+        ) {
           //console.log(markers[i].infowindow.content);
           eventData[index] =
             eventData[index] +
-            "'<li>'" +
-            '\'<a target = "_blank" href = "\'' +
+            '<li>' +
+            '<a target = "_blank" href = "' +
             myEvents[i].details +
             '">' +
             myEvents[i].name +
+            ' ' +
+            myEvents[i].time +
             '</a>' +
             '</li>';
           markers[index].bindPopup(eventData[index]);
@@ -373,8 +383,10 @@ document.getElementById('my-events').addEventListener('click', function() {
                 myEvents[i].details +
                 '">' +
                 myEvents[i].name +
+                ' ' +
+                myEvents[i].time +
                 '</a>' +
-                '</li>',
+                '</li> <br />',
               {
                 maxWidth: 150,
                 closeButton: true,
@@ -385,12 +397,12 @@ document.getElementById('my-events').addEventListener('click', function() {
 
             // marker.setContent('Hello World');
 
-            marker1.on('mouseover', function(e) {
-              marker1.openPopup();
-            });
-            marker1.on('mouseout', function(e) {
-              marker1.closePopup();
-            });
+            // marker1.on('mouseover', function(e) {
+            //   marker1.openPopup();
+            // });
+            // marker1.on('mouseout', function(e) {
+            //   marker1.closePopup();
+            // });
           }
 
           markers.push(marker1);
@@ -398,12 +410,12 @@ document.getElementById('my-events').addEventListener('click', function() {
 
           var name =
             "'<li>'" +
-            '\'<a target = "_blank" href = "\'' +
+            '<a target = "_blank" href = "' +
             myEvents[i].details +
             '">' +
             myEvents[i].name +
             '</a>' +
-            '</li>';
+            '</li> <br />';
           locations.push(myEvents[i].location);
           eventData.push(name);
         }
@@ -494,9 +506,10 @@ function showWikiDetails(arrayIndex, array) {
 }
 socket.on('videosData', function(data) {
   var size = Object.keys(data.items).length;
+  console.log(size);
 
   for (let i = 0; i < size; ++i) {
-    //console.log(data.items[i].id.videoId);
+    console.log(data.items[i].snippet.title);
     $('#panel').append(
       '<li><a href="https://www.youtube.com/embed/' +
         data.items[i].id.videoId +

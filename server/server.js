@@ -91,7 +91,10 @@ io.on(`connection`, socket => {
       // }
 
       // if (myEvents.length > 0) console.log(eventsArray);
-      if (json) socket.emit('allEventsData', json);
+      if (json) {
+        // console.log(json);
+        socket.emit('allEventsData', json);
+      }
     });
   });
 
