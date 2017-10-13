@@ -394,7 +394,9 @@ document.getElementById('my-events').addEventListener('click', function() {
           if (myEvents[i].latlng) {
             var marker1 = new WE.marker(
               [myEvents[i].latlng.lat, myEvents[i].latlng.lng],
-              '/images/c4.png'
+              '/images/c3.png',
+              25,
+              25
             ).addTo(earth);
 
             marker1.bindPopup(
@@ -427,7 +429,14 @@ document.getElementById('my-events').addEventListener('click', function() {
           }
 
           markers.push(marker1);
-          //markers[markers.length-1].bindPopup()
+          for (let i = 0; i < markers.length; ++i) {
+            markers[i].on('mouseover', function() {
+              markers[i].openPopup();
+            });
+            markers[i].on('mouseout', function() {
+              markers[i].closePopup();
+            });
+          }
 
           var name =
             "'<li>'" +
@@ -583,8 +592,18 @@ socket.on('landmark-data', function(data) {
 
   var image =
     'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
-  if (data.jsonLandmark.landmark.toLowerCase().indexOf('church') >= 0) {
+  if (
+    data.jsonLandmark.landmark.toLowerCase().indexOf('church') >= 0 ||
+    data.jsonLandmark.landmark.toLowerCase().indexOf('cathedral') >= 0 ||
+    data.jsonLandmark.landmark.toLowerCase().indexOf('convent') >= 0
+  ) {
     image = '/images/church.png';
+  }
+  if (data.jsonLandmark.landmark.toLowerCase().indexOf('haveli') >= 0) {
+    image = '/images/home.png';
+  }
+  if (data.jsonLandmark.landmark.toLowerCase().indexOf('office') >= 0) {
+    image = '/images/home.png';
   }
   if (data.jsonLandmark.landmark.toLowerCase().indexOf('village') >= 0) {
     image = '/images/v2.png';
@@ -602,6 +621,7 @@ socket.on('landmark-data', function(data) {
   if (
     data.jsonLandmark.landmark.toLowerCase().indexOf('university') >= 0 ||
     data.jsonLandmark.landmark.toLowerCase().indexOf('college') >= 0 ||
+    data.jsonLandmark.landmark.toLowerCase().indexOf('academy') >= 0 ||
     data.jsonLandmark.landmark.toLowerCase().indexOf('institute') >= 0
   ) {
     image = '/images/university.png';
@@ -634,7 +654,9 @@ socket.on('landmark-data', function(data) {
   //console.log(data.jsonLandmark.lat);
   var marker = new WE.marker(
     [data.jsonLandmark.lat, data.jsonLandmark.lng],
-    image
+    image,
+    25,
+    25
   ).addTo(earth);
 
   marker.bindPopup(data.jsonLandmark.landmark);

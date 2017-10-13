@@ -9,18 +9,18 @@ var landmarksWiki = (address, callback) => {
   address = address.toLowerCase();
   address = address.replace(/\s/g, '-');
   var newAddress = encodeURI(address);
-  console.log(newAddress);
+  console.log('landmarks wiki');
   let options = {
     uri: `http://pakistani.pk/${newAddress}/`,
     transform: function(body) {
       return cheerio.load(body);
     }
   };
-  console.log(options.uri);
+  //console.log(options.uri);
   rp(options)
     .then(function($) {
       // Process html like you would with jQuery...
-      console.log('WIKI');
+      console.log('LANDMARKS WIKI');
       var json1 = {};
       json1['description'] = $('.jrListingFulltext')
         .children()
@@ -33,7 +33,7 @@ var landmarksWiki = (address, callback) => {
     .catch(function(err) {
       // Crawling failed or Cheerio choked...
       //console.log("Error, not found")
-      let json1 = {};
+      let json1 = null;
       callback(json1);
     });
   callback(null);

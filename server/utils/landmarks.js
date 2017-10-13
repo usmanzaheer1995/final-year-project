@@ -52,9 +52,9 @@ var scrapeLandmarks = (apiKey, address, callback) => {
         //------------------NODE-GEOCODER------------------//
 
         geocoder
-          .geocode(phrases[i])
+          .geocode(phrases[i] + newAddress)
           .then(function(res) {
-            //console.log('geocoding');
+            //console.log(phrases[i] + ' ' + newAddress);
             if (res[0] && res.statusCode !== 400) {
               //console.log(phrases[i]);
               //console.log(res[0].latitude, res[0].longitude)

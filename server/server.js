@@ -34,7 +34,7 @@ io.on(`connection`, socket => {
       // let size = Object.keys(json1).length;
       // console.log(size);
       // console.log(json1);
-      socket.emit('returnWikiData', json1);
+      if (json1) socket.emit('returnWikiData', json1);
     });
   });
 
