@@ -16,7 +16,6 @@ var landmarksWiki = (address, callback) => {
       return cheerio.load(body);
     }
   };
-  //console.log(options.uri);
   rp(options)
     .then(function($) {
       // Process html like you would with jQuery...
@@ -25,14 +24,10 @@ var landmarksWiki = (address, callback) => {
       json1['description'] = $('.jrListingFulltext')
         .children()
         .text();
-
-      //console.log(json1['description']);
-      //socket.emit('returnWikiData', json1);
       callback(json1);
     })
     .catch(function(err) {
       // Crawling failed or Cheerio choked...
-      //console.log("Error, not found")
       let json1 = null;
       callback(json1);
     });
@@ -41,7 +36,6 @@ var landmarksWiki = (address, callback) => {
 
 var scrapeWiki = (address, callback) => {
   var newAddress = encodeURI(address);
-  //console.log(newAddress);
   let options = {
     uri: `https://en.wikipedia.org/wiki/${newAddress}`,
     transform: function(body) {
@@ -67,18 +61,11 @@ var scrapeWiki = (address, callback) => {
         json1[prop_name] = $(this)
           .find('td')
           .text();
-
-        // if ({ "capital": 1 }[prop_name]) {
-        //     //console.log('Capital: ');
-        //     capital = $(this).find("td").text();
       });
-      // console.log('scrapping done');
-      //socket.emit('returnWikiData', json1);
       callback(json1);
     })
     .catch(function(err) {
       // Crawling failed or Cheerio choked...
-      //console.log("Error, not found")
       let json1 = {};
       callback(json1);
     });

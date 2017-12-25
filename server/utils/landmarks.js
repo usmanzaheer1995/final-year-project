@@ -19,7 +19,6 @@ var scrapeLandmarks = (apiKey, address, callback) => {
       return cheerio.load(body);
     }
   };
-  //console.log(options.uri);
 
   var options1 = {
     provider: 'google',
@@ -34,7 +33,6 @@ var scrapeLandmarks = (apiKey, address, callback) => {
   rp(options)
     .then(function($) {
       console.log('landmarks');
-      //landmarkName = 'landmark', landmarkLat = 'lat', landmarkLng = 'lng';
       $('.jrTableGrid.jrDataList.jrResults')
         .find('.jrRow')
         .each(function() {
@@ -49,15 +47,10 @@ var scrapeLandmarks = (apiKey, address, callback) => {
     })
     .then(() => {
       for (let i = 0; i < phrases.length; ++i) {
-        //------------------NODE-GEOCODER------------------//
-
         geocoder
           .geocode(phrases[i] + newAddress)
           .then(function(res) {
-            //console.log(phrases[i] + ' ' + newAddress);
             if (res[0] && res.statusCode !== 400) {
-              //console.log(phrases[i]);
-              //console.log(res[0].latitude, res[0].longitude)
               jsonLandmark[landmarkName] = phrases[i];
               jsonLandmark[landmarkLat] = res[0].latitude;
               jsonLandmark[landmarkLng] = res[0].longitude;
@@ -65,31 +58,6 @@ var scrapeLandmarks = (apiKey, address, callback) => {
             }
           })
           .catch(err => console.log(err.message));
-
-        //------------------END OF NODE-GEOCODER------------------//
-
-        //-------------------------AXIOS ------------------------//
-
-        // let abc = encodeURI(phrases[i])
-        // let geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${abc}`;
-        // //console.log(geocodeUrl);
-        // axios.get(geocodeUrl).then((response) => {
-        //     if (response.data.results.length > 0 && response.statusCode !== 400) {
-
-        //         //console.log('hi')
-        //         let latitude = response.data.results[0].geometry.location.lat;
-        //         let longitude = response.data.results[0].geometry.location.lng;
-
-        //         //console.log(longitude, latitude);
-        //         jsonLandmark[landmarkName] = phrases[i];
-        //         jsonLandmark[landmarkLat] = latitude;
-        //         jsonLandmark[landmarkLng] = longitude;
-        //         // socket.emit('landmark-data', { jsonLandmark });
-        //         callback(jsonLandmark);
-        //     }
-        // });
-
-        //-------------------------END OF AXIOS--------------------------//
       }
     })
     .catch(function(err) {

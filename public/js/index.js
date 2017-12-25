@@ -9,6 +9,13 @@ var locations = [];
 var infowindowArray = [];
 var myEvents = [];
 var markers = [];
+var gMarkers = [];
+
+/////////////////
+var nMarkers = [];
+var eventMarkers = [];
+////////////////
+
 var address;
 var eventData = [];
 var inforwindowLandmark;
@@ -51,20 +58,6 @@ a.onclick = function() {
 };
 
 function initialize() {
-  // var pyrmont = new google.maps.LatLng(33.7294, 73.0931);
-  // var request = {
-  //   location: pyrmont,
-  //   radius: '500',
-  //   type: ['school']
-  // };
-  // var map = new google.maps.Map(document.getElementById('map'), {
-  //   center: pyrmont,
-  //   zoom: 15
-  // });
-  // var service;
-  // service = new google.maps.places.PlacesService(map);
-  // service.nearbySearch(request, callback);
-  // map = null;
   geocoder = new google.maps.Geocoder();
   earth = new WE.map('earth_div', {
     center: [30.3753, 69.3451],
@@ -73,7 +66,6 @@ function initialize() {
     scrollWheelZoom: true,
     proxyHost: 'https://srtm.webglearth.com/cgi-bin/corsproxy.fcgi?url='
   });
-  //earth.setView([30.3753, 69.3451], 3);
   var baselayer = WE.tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
@@ -91,15 +83,6 @@ function initialize() {
   earth.on('dblclick', showInfo);
 }
 
-function callback(results, status) {
-  console.log('callback');
-  if (status == google.maps.places.PlacesServiceStatus.OK) {
-    for (var i = 0; i < results.length; i++) {
-      console.log(results[i]);
-    }
-  }
-}
-
 // reverse geocoding
 var showInfo = function(e) {
   if (marker) marker.removeFrom(earth);
@@ -108,12 +91,23 @@ var showInfo = function(e) {
 
   marker = WE.marker([e.latitude, e.longitude]);
 
-  // var popup = WE.popup()
-  //   .setLatLng(latlng)
-  //   .setContent('<p>Hello world!<br />This is a nice popup.</p>')
-  //   .openOn(earth);
-
   marker.addTo(earth);
+
+  var loc = new google.maps.LatLng(e.latitude, e.longitude);
+
+  var request = {
+    location: loc,
+    radius: 500,
+    types: ['restaurant', 'university', 'mosque', 'airport', 'park']
+  };
+
+  /////// GOOGLE PLACES ///////////
+
+  let t_map = new google.maps.Map(document.getElementById('map'));
+  var service = new google.maps.places.PlacesService(t_map);
+  service.nearbySearch(request, callback);
+
+  ////////////////////////////////
 
   marker.bindPopup(
     'You clicked the map at ' +
@@ -128,16 +122,116 @@ var showInfo = function(e) {
     }
   );
 
-  // marker.on('mouseover', mouseOverMarker);
-  // marker.on('mouseout', mouseOutMarker);
+  if (eventMarkers.length > 0) {
+    for (var i = 0; i < eventMarkers.length; i++) {
+      eventMarkers[i].removeFrom(earth);
+    }
+    eventMarkers.length = 0;
+  }
 
-  marker.on('click', zoomIn);
-  //marker.on('dblclick', removeMarker);
-  //   popup
-  //     .setLatLng(e.latlng)
-  //     .setContent('You clicked the map at ' + e.latlng.toString())
-  //     .openOn(earth);
+  for (let i = 0; i < markers.length; i++) {
+    if (markers[i]) {
+      var markerr = new google.maps.Marker({
+        position: new google.maps.LatLng(e.latitude, e.longitude)
+      });
+
+      // Add circle overlay and bind to marker
+      var circle = new google.maps.Circle({
+        radius: 500 //
+      });
+      circle.bindTo('center', markerr, 'position');
+
+      if (circle.getBounds().contains(gMarkers[i].getPosition())) {
+        markers[i].addTo(earth);
+        eventMarkers.push(markers[i]);
+        console.log('true');
+      } else {
+        console.log('false');
+      }
+    }
+  }
 };
+
+function callback(results, status) {
+  //////////////////
+  if (nMarkers.length > 0) {
+    for (var i = 0; i < nMarkers.length; i++) {
+      nMarkers[i].removeFrom(earth);
+    }
+    nMarkers.length = 0;
+  }
+  ////////////////
+  if (status == google.maps.places.PlacesServiceStatus.OK) {
+    for (var i = 0; i < results.length; i++) {
+      var place = results[i];
+      var latlng = {
+        lat: results[i].geometry.location.lat(),
+        lng: results[i].geometry.location.lng()
+      };
+      var icon = '/images/university.png';
+      geocodeLatLng(geocoder, earth, latlng);
+      if (results[i].types.indexOf('restaurant') >= 0) {
+        icon = '/images/resturant.png';
+      }
+      if (results[i].types.indexOf('mosque') >= 0) {
+        icon = '/images/m1.png';
+      }
+      if (results[i].types.indexOf('park') >= 0) {
+        icon = '/images/park.png';
+      }
+      var tmarker = WE.marker(
+        [
+          results[i].geometry.location.lat(),
+          results[i].geometry.location.lng()
+        ],
+        icon,
+        20,
+        20
+      );
+
+      //////////////////////////////////////////////////
+      if (results[i].rating) {
+        tmarker.bindPopup(
+          '<p>' +
+            results[i].name +
+            '</p>' +
+            '<p>' +
+            'Rating: ' +
+            results[i].rating +
+            '</p>',
+          {
+            maxWidth: 150,
+            closeButton: true,
+            autoClose: true,
+            closeOnClick: true
+          }
+        );
+      } else {
+        tmarker.bindPopup(results[i].name, {
+          maxWidth: 150,
+          closeButton: true,
+          autoClose: true,
+          closeOnClick: true
+        });
+      }
+
+      /////////////////////////////////////////////////////
+      /////////////
+      nMarkers.push(tmarker);
+      /////////////
+      for (let i = 0; i < nMarkers.length; ++i) {
+        nMarkers[i].on('mouseover', function() {
+          nMarkers[i].openPopup();
+        });
+        nMarkers[i].on('mouseout', function() {
+          nMarkers[i].closePopup();
+        });
+      }
+
+      tmarker.addTo(earth);
+    }
+  }
+}
 
 function removeMarker(e) {
   marker.removeFrom(earth);
@@ -147,13 +241,7 @@ function panTo(coords) {
   earth.panTo(coords);
 }
 
-function zoomIn(e) {
-  earth.setZoom(5);
-  //marker.removeFrom(earth);
-}
-
 function mouseOverMarker(e) {
-  //console.log(e.latitude);
   marker.openPopup();
 }
 function mouseOutMarker(e) {
@@ -165,15 +253,14 @@ function geocodeLatLng(geocoder, map, latlng) {
     if (status === 'OK') {
       if (results[0]) {
         let stringArray = results[0].formatted_address.split(',');
-        console.log(results[0]);
-        console.log(stringArray);
-        // infowindow.setContent(results[0].formatted_address);
-        // infowindow.open(map, marker);
+        earth.setZoom(15);
+        earth.panTo([
+          results[0].geometry.location.lat(),
+          results[0].geometry.location.lng()
+        ]);
       } else {
         window.alert('No results found');
       }
-    } else {
-      window.alert('Geocoder failed due to: ' + status);
     }
   });
 }
@@ -203,20 +290,8 @@ document.getElementById('search-btn').addEventListener('click', function() {
 });
 
 function geocodeAddress(address) {
-  //deleteMarkers();
   geocoder.geocode({ address: address }, function(results, status) {
     if (status === 'OK') {
-      //map.setCenter(results[0].geometry.location);
-      //map.setZoom(12);
-      //console.log(results[0].geometry.location.lat());
-      // earth.setView(
-      //   [
-      //     results[0].geometry.location.lat(),
-      //     results[0].geometry.location.lng()
-      //   ],
-      //   14
-      // );
-      //console.log(results[0].geometry.location.lat());
       earth.setZoom(13);
       earth.panTo([
         results[0].geometry.location.lat(),
@@ -239,17 +314,6 @@ function geocodeAddress(address) {
       cityMarker.on('mouseout', function(e) {
         cityMarker.closePopup();
       });
-      // google.maps.event.addListener(marker, 'click', function () {
-      //     landmark = 1;
-      //     $("#panel").empty();
-      //     $("#infoPanel").empty();
-      //     $("#panel1").empty();
-      //     $('#progressBar').fadeIn("slow");
-      //     $("#contentTable tr").remove();
-      //     socket.emit('scrapeWiki', { address });
-      //     socket.emit('videos', { address });
-      //     socket.emit('scrapeBlogs', { address });
-      // });
     } else if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
       setTimeout(function() {
         geocodeAddress(address);
@@ -274,8 +338,6 @@ function clearMarkers() {
 }
 function deleteMarkers() {
   clearMarkers();
-  markers = [];
-  locations = [];
 }
 
 function showWikiDetails(arrayIndex, array) {
@@ -291,9 +353,7 @@ function showWikiDetails(arrayIndex, array) {
     +'<strong>';
 
     //add new line to column after every 80 characters
-    cell2.innerHTML = array[x].replace(/(.{80})/g, '$1<br>'); //shukria stackoverflow
-
-    //$("#infoPanel").append('<li><strong>' + arrayIndex[x]  + ': ' + array[x] + '</li>');
+    cell2.innerHTML = array[x].replace(/(.{80})/g, '$1<br>');
   }
   var a = parseInt($('#percentage').text());
   a = a + 10;
@@ -307,10 +367,9 @@ function showWikiDetails(arrayIndex, array) {
   }
 }
 socket.on('returnWikiData', function(data) {
-  //console.log('wiki data');
   let size = null;
   if (data) size = Object.keys(data).length;
-  //console.log(size);
+
   if (size === 0) {
     socket.emit('landmarks-wiki', { address });
   } else if (size) {
@@ -329,7 +388,6 @@ socket.on('videosData', function(data) {
   var size = Object.keys(data.items).length;
 
   for (let i = 0; i < size; ++i) {
-    //console.log(data.items[i].id.videoId);
     $('#panel').append(
       '<li><a href="https://www.youtube.com/embed/' +
         data.items[i].id.videoId +
@@ -337,7 +395,6 @@ socket.on('videosData', function(data) {
         data.items[i].snippet.title +
         '</span></a></li>'
     );
-    //$("#videos-names-list").append('<li><a href="https://www.youtube.com/embed/' + data.items[i].id.videoId + '?enablejsapi=1" target="_blank"><span class="tab">' + data.items[i].snippet.title + '</span></a></li>');
   }
 
   var a = parseInt($('#percentage').text());
@@ -361,18 +418,15 @@ socket.on('blogsData', function(data) {
 
 var myEventsClicked = false;
 document.getElementById('my-events').addEventListener('click', function() {
-  //console.log(myEvents.length, locations.length);
   if (myEventsClicked === false) {
     myEventsClicked = true;
     for (let i = 0; i < myEvents.length; ++i) {
-      //console.log(myEvents[i].location);
       var flag = false;
       for (let index = 0; index < locations.length; ++index) {
         if (
           locations[index] === myEvents[i].location &&
           eventData[index].indexOf(myEvents[i].name) < 0
         ) {
-          //console.log(markers[i].infowindow.content);
           eventData[index] =
             eventData[index] +
             '<li>' +
@@ -399,8 +453,14 @@ document.getElementById('my-events').addEventListener('click', function() {
               25
             ).addTo(earth);
 
+            var tmarkerr = new google.maps.Marker({
+              position: new google.maps.LatLng(
+                myEvents[i].latlng.lat,
+                myEvents[i].latlng.lng
+              )
+            });
+
             marker1.bindPopup(
-              //content: '<li>' + data.name + " " + '</li>'
               '<li>' +
                 '<a target = "_blank" href = "' +
                 myEvents[i].details +
@@ -417,26 +477,9 @@ document.getElementById('my-events').addEventListener('click', function() {
                 closeOnClick: true
               }
             );
-
-            // marker.setContent('Hello World');
-
-            // marker1.on('mouseover', function(e) {
-            //   marker1.openPopup();
-            // });
-            // marker1.on('mouseout', function(e) {
-            //   marker1.closePopup();
-            // });
           }
-
           markers.push(marker1);
-          for (let i = 0; i < markers.length; ++i) {
-            markers[i].on('mouseover', function() {
-              markers[i].openPopup();
-            });
-            markers[i].on('mouseout', function() {
-              markers[i].closePopup();
-            });
-          }
+          gMarkers.push(tmarkerr);
 
           var name =
             "'<li>'" +
@@ -458,20 +501,12 @@ document.getElementById('my-events').addEventListener('click', function() {
 });
 
 socket.on('eventsData', function(data) {
-  //console.log("BACK");
-  // let size = Object.keys(myEvents).length;
-  // for (let i = 0; i < size; ++i) {
-  //   console.log(myEvents[i]);
-  // }
   if (data) myEvents.push(data);
 });
 socket.on('meetupData', function(data) {
-  //console.log(data);
   if (data) myEvents.push(data);
 });
 socket.on('allEventsData', function(data) {
-  //if (data && Object.keys(data).length > 0) {
-  //console.log(data);
   if (data) myEvents.push(data);
   var a = parseInt($('#percentage').text());
   a = a + 1;
@@ -484,7 +519,6 @@ socket.on('allEventsData', function(data) {
     $('#progressBar').fadeOut('slow');
     $('#percentage').text(0);
   }
-  //}
 });
 
 function showWikiDetails(arrayIndex, array) {
@@ -499,10 +533,7 @@ function showWikiDetails(arrayIndex, array) {
       arrayIndex[x].slice(1);
     +'<strong>';
 
-    //         //add new line to column after every 80 characters
-    cell2.innerHTML = array[x].replace(/(.{80})/g, '$1<br>'); //shukria stackoverflow
-
-    //$("#infoPanel").append('<li><strong>' + arrayIndex[x]  + ': ' + array[x] + '</li>');
+    cell2.innerHTML = array[x].replace(/(.{80})/g, '$1<br>');
   }
   var a = parseInt($('#percentage').text());
   a = a + 10;
@@ -514,362 +545,109 @@ function showWikiDetails(arrayIndex, array) {
       $('#percentage').text(0);
     }
   }
-  // if (a < 100 || a > 100) {
-  //     //     a = 100;
-  //     //     $('#percentage').text(100);
-  //     //     $('#progressBar').fadeOut("slow");
-  //     //     $('#percentage').text(0);
-  //     // }
-  //     // document.getElementById('infoButton').addEventListener('click', function () {
-  //     //       this.classList.toggle("active");
-  //     //       var panel = this.nextElementSibling;
-  //     //       if (panel.style.display === "block") {
-  //     //          panel.style.display = "none";
-  //     //       } else {
 
-  //     //           panel.style.display = "block";
-  //     //       }
-  //     //   });
-
-  //     /*-------------------------------------------------------
-  //     ------------------------------------------------------------*/
-}
-// socket.on('videosData', function(data) {
-//   var size = Object.keys(data.items).length;
-//   console.log(size);
-
-//   for (let i = 0; i < size; ++i) {
-//     console.log(data.items[i].snippet.title);
-//     $('#panel').append(
-//       '<li><a href="https://www.youtube.com/embed/' +
-//         data.items[i].id.videoId +
-//         '?enablejsapi=1" target="_blank"><span class="tab">' +
-//         data.items[i].snippet.title +
-//         '</span></a></li>'
-//     );
-//     //$("#videos-names-list").append('<li><a href="https://www.youtube.com/embed/' + data.items[i].id.videoId + '?enablejsapi=1" target="_blank"><span class="tab">' + data.items[i].snippet.title + '</span></a></li>');
-//   }
-
-//   var a = parseInt($('#percentage').text());
-
-//   a = a + 5;
-//   $('#percentage').text(a);
-// });
-
-// socket.on('blogsData', function (data) {
-
-//     //console.log(data.title);
-//     //console.log(data.link);
-
-//     //console.log("reached here");
-//     $("#panel1").append('<li><a target = "_blank" href = "' + data.link + '">' + data.title + '</a>' + '</li>');
-//     var a = parseInt($('#percentage').text());
-//     a = a + 1;
-
-// });
-// socket.on('returnWikiData', function(data) {
-//   //console.log('wiki data');
-//   let size = Object.keys(data).length;
-//   //     //console.log(size);
-//   if (size === 0) {
-//     socket.emit('landmarks-wiki', { address });
-//   } else {
-//     var arrayIndex = $.map(data, function(value, index) {
-//       return [index];
-//     });
-//     var array = $.map(data, function(value, index) {
-//       return [value];
-//     });
-
-//     showWikiDetails(arrayIndex, array);
-//   }
-// });
-
-socket.on('landmark-data', function(data) {
-  //console.log(data);
-  //     // console.log(data.jsonLandmark.landmark);
-  //     // console.log(data.jsonLandmark.lat, data.jsonLandmark.lng)
-
-  var image =
-    'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
-  if (
-    data.jsonLandmark.landmark.toLowerCase().indexOf('church') >= 0 ||
-    data.jsonLandmark.landmark.toLowerCase().indexOf('cathedral') >= 0 ||
-    data.jsonLandmark.landmark.toLowerCase().indexOf('convent') >= 0
-  ) {
-    image = '/images/church.png';
-  }
-  if (data.jsonLandmark.landmark.toLowerCase().indexOf('haveli') >= 0) {
-    image = '/images/home.png';
-  }
-  if (data.jsonLandmark.landmark.toLowerCase().indexOf('office') >= 0) {
-    image = '/images/home.png';
-  }
-  if (data.jsonLandmark.landmark.toLowerCase().indexOf('village') >= 0) {
-    image = '/images/v2.png';
-  }
-  if (data.jsonLandmark.landmark.toLowerCase().indexOf('gate') >= 0) {
-    image = '/images/gate.png';
-  }
-  if (
-    data.jsonLandmark.landmark.toLowerCase().indexOf('hills') >= 0 ||
-    data.jsonLandmark.landmark.toLowerCase().indexOf('mountain') >= 0 ||
-    data.jsonLandmark.landmark.toLowerCase().indexOf('koh') >= 0
-  ) {
-    image = '/images/hill_m.png';
-  }
-  if (
-    data.jsonLandmark.landmark.toLowerCase().indexOf('university') >= 0 ||
-    data.jsonLandmark.landmark.toLowerCase().indexOf('college') >= 0 ||
-    data.jsonLandmark.landmark.toLowerCase().indexOf('academy') >= 0 ||
-    data.jsonLandmark.landmark.toLowerCase().indexOf('institute') >= 0
-  ) {
-    image = '/images/university.png';
-  }
-  if (
-    data.jsonLandmark.landmark.toLowerCase().indexOf('tomb') >= 0 ||
-    data.jsonLandmark.landmark.toLowerCase().indexOf('shrine') >= 0 ||
-    data.jsonLandmark.landmark.toLowerCase().indexOf('graveyard') >= 0
-  ) {
-    image = '/images/tomb.png';
-  }
-  if (data.jsonLandmark.landmark.toLowerCase().indexOf('court') >= 0) {
-    image = '/images/court.png';
-  }
-  if (data.jsonLandmark.landmark.toLowerCase().indexOf('stadium') >= 0) {
-    image = '/images/s1.png';
-  }
-  if (
-    data.jsonLandmark.landmark.toLowerCase().indexOf('masjid') >= 0 ||
-    data.jsonLandmark.landmark.toLowerCase().indexOf('mosque') >= 0
-  ) {
-    image = '/images/m1.png';
-  }
-  if (
-    data.jsonLandmark.landmark.toLowerCase().indexOf('tower') >= 0 ||
-    data.jsonLandmark.landmark.toLowerCase().indexOf('building') >= 0
-  ) {
-    image = '/images/building.png';
-  }
-  //console.log(data.jsonLandmark.lat);
-  var marker = new WE.marker(
-    [data.jsonLandmark.lat, data.jsonLandmark.lng],
-    image,
-    25,
-    25
-  ).addTo(earth);
-
-  marker.bindPopup(data.jsonLandmark.landmark);
-  marker.on('mouseover', function(e) {
-    marker.openPopup();
-  });
-  marker.on('mouseout', function(e) {
-    marker.closePopup();
-  });
-  //  var marker = new google.maps.Marker({
-  //      position: { lat: data.jsonLandmark.lat, lng: data.jsonLandmark.lng },
-  //      map: map,
-  //      icon: image,
-  //      //shape: shape,
-  //      title: data.jsonLandmark.landmark,
-  //  });
-  //   google.maps.event.addListener(marker, 'click', function () {
-  marker.on('click', function() {
-    findLandmark = 1;
-    //         //geocodeAddress(data.jsonLandmark.landmark);
-    address = data.jsonLandmark.landmark;
-    //         // console.log(data.jsonLandmark.landmark);
-
-    geocoder.geocode({ address: data.jsonLandmark.landmark }, function(
-      results,
-      status
+  socket.on('landmark-data', function(data) {
+    var image =
+      'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+    if (
+      data.jsonLandmark.landmark.toLowerCase().indexOf('church') >= 0 ||
+      data.jsonLandmark.landmark.toLowerCase().indexOf('cathedral') >= 0 ||
+      data.jsonLandmark.landmark.toLowerCase().indexOf('convent') >= 0
     ) {
-      if (status === 'OK') {
-        //                 map.setCenter(results[0].geometry.location);
-        //                 map.zoom = 15;
-        //                 //console.log(landmarkName);
-        $('#panel').empty();
-        $('#infoPanel').empty();
-        //                 //$("#panel1").empty();
-        $('#progressBar').fadeIn('slow');
-        $('#contentTable tr').remove();
-        socket.emit('scrapeWiki', { address });
-        socket.emit('videos', { address });
-        //                 //socket.emit('scrapeBlogs', { address });
-      } else {
-        alert('Geocode was not successful for the following reason: ' + status);
-      }
+      image = '/images/church.png';
+    }
+    if (data.jsonLandmark.landmark.toLowerCase().indexOf('haveli') >= 0) {
+      image = '/images/home.png';
+    }
+    if (data.jsonLandmark.landmark.toLowerCase().indexOf('office') >= 0) {
+      image = '/images/home.png';
+    }
+    if (data.jsonLandmark.landmark.toLowerCase().indexOf('village') >= 0) {
+      image = '/images/v2.png';
+    }
+    if (data.jsonLandmark.landmark.toLowerCase().indexOf('gate') >= 0) {
+      image = '/images/gate.png';
+    }
+    if (
+      data.jsonLandmark.landmark.toLowerCase().indexOf('hills') >= 0 ||
+      data.jsonLandmark.landmark.toLowerCase().indexOf('mountain') >= 0 ||
+      data.jsonLandmark.landmark.toLowerCase().indexOf('koh') >= 0
+    ) {
+      image = '/images/hill_m.png';
+    }
+    if (
+      data.jsonLandmark.landmark.toLowerCase().indexOf('university') >= 0 ||
+      data.jsonLandmark.landmark.toLowerCase().indexOf('college') >= 0 ||
+      data.jsonLandmark.landmark.toLowerCase().indexOf('academy') >= 0 ||
+      data.jsonLandmark.landmark.toLowerCase().indexOf('institute') >= 0
+    ) {
+      image = '/images/university.png';
+    }
+    if (
+      data.jsonLandmark.landmark.toLowerCase().indexOf('tomb') >= 0 ||
+      data.jsonLandmark.landmark.toLowerCase().indexOf('shrine') >= 0 ||
+      data.jsonLandmark.landmark.toLowerCase().indexOf('graveyard') >= 0
+    ) {
+      image = '/images/tomb.png';
+    }
+    if (data.jsonLandmark.landmark.toLowerCase().indexOf('court') >= 0) {
+      image = '/images/court.png';
+    }
+    if (data.jsonLandmark.landmark.toLowerCase().indexOf('stadium') >= 0) {
+      image = '/images/s1.png';
+    }
+    if (
+      data.jsonLandmark.landmark.toLowerCase().indexOf('masjid') >= 0 ||
+      data.jsonLandmark.landmark.toLowerCase().indexOf('mosque') >= 0
+    ) {
+      image = '/images/m1.png';
+    }
+    if (
+      data.jsonLandmark.landmark.toLowerCase().indexOf('tower') >= 0 ||
+      data.jsonLandmark.landmark.toLowerCase().indexOf('building') >= 0
+    ) {
+      image = '/images/building.png';
+    }
+    var marker = new WE.marker(
+      [data.jsonLandmark.lat, data.jsonLandmark.lng],
+      image,
+      25,
+      25
+    ).addTo(earth);
+
+    marker.bindPopup(data.jsonLandmark.landmark);
+    marker.on('mouseover', function(e) {
+      marker.openPopup();
     });
+    marker.on('mouseout', function(e) {
+      marker.closePopup();
+    });
+    marker.on('click', function() {
+      findLandmark = 1;
+      address = data.jsonLandmark.landmark;
+
+      geocoder.geocode({ address: data.jsonLandmark.landmark }, function(
+        results,
+        status
+      ) {
+        if (status === 'OK') {
+          $('#panel').empty();
+          $('#infoPanel').empty();
+          $('#progressBar').fadeIn('slow');
+          $('#contentTable tr').remove();
+          socket.emit('scrapeWiki', { address });
+          socket.emit('videos', { address });
+        } else {
+          alert(
+            'Geocode was not successful for the following reason: ' + status
+          );
+        }
+      });
+    });
+
+    var a = parseInt($('#percentage').text());
+
+    a = a + 1;
+    $('#percentage').text(a);
   });
-
-  var a = parseInt($('#percentage').text());
-
-  a = a + 1;
-  $('#percentage').text(a);
-});
-
-// function setMapOnAll(map) {
-//     for (var i = 0; i < markers.length; i++) {
-//         markers[i].setMap(map);
-//     }
-// }
-
-// function clearMarkers() {
-//     setMapOnAll(null);
-// }
-// function deleteMarkers() {
-//     clearMarkers();
-//     markers = [];
-//     locations = [];
-// }
-
-// var myEventsClicked = false;
-// document.getElementById('my-events').addEventListener('click', function () {
-
-//     if (myEventsClicked === false) {
-//         myEventsClicked = true;
-//         for (let i = 0; i < myEvents.length; ++i) {
-//             //console.log(myEvents[i].location);
-//             var flag = false;
-//             for (let index = 0; index < locations.length; ++index) {
-//                 if (locations[index] === myEvents[i].location) {
-//                     //console.log(markers[i].infowindow.content);
-//                     markers[index].infowindow.setContent(markers[index].infowindow.content + '<li>' + '<a target = "_blank" href = "' + myEvents[i].details + '">' + myEvents[i].name + '</a>' + '</li>');
-//                     flag = true;
-
-//                 }
-//             }
-
-//             if (flag === false) {
-
-//                 var marker = new google.maps.Marker({
-//                     map: map,
-//                     position: myEvents[i].latlng,
-//                     //icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
-//                     icon: '/images/c4.png'
-//                 });
-//                 //marker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
-
-//                 marker.infowindow = new google.maps.InfoWindow({
-//                     //content: '<li>' + data.name + " " + '</li>'
-//                     content: '<li>' + '<a target = "_blank" href = "' + myEvents[i].details + '">' + myEvents[i].name + '</a>' + '</li>'
-//                 });
-
-//                 markers.push(marker);
-//                 locations.push(myEvents[i].location);
-
-//                 google.maps.event.addListener(marker, 'mouseover', function () {
-//                     this.infowindow.open(map, this);
-//                 });
-//                 google.maps.event.addListener(marker, 'click', function () {
-//                     this.infowindow.close();
-//                 });
-//             }
-//         }
-
-//     }
-//     else {
-//         deleteMarkers();
-//         myEventsClicked = false;
-//     }
-
-// });
-
-// socket.on('eventsData', function (data) {
-//     //console.log("BACK");
-//     //let size = Object.keys(myEvents).length;
-
-//     myEvents.push(data);
-//     var a = parseInt($('#percentage').text());
-//     console.log(a);
-//     a = a + 1;
-//     $('#percentage').text(a);
-
-//     $('#my-events').fadeIn("slow");
-//     if (a < 100 || a > 100) {
-//         a = 100;
-//         $('#percentage').text(100);
-//         $('#progressBar').fadeOut("slow");
-//         $('#percentage').text(0);
-//     }
-// });
-// socket.on('meetupData', function (data) {
-//     //console.log(data);
-//     myEvents.push(data);
-
-// });
-
-// function callback(results, status) {
-//     if (status === google.maps.places.PlacesServiceStatus.OK) {
-//         for (var i = 0; i < results.length; i++) {
-//             console.log(results[i]);
-//             createMarker(results[i]);
-//         }
-//     }
-// }
-
-// function createMarker(place) {
-//     var placeLoc = place.geometry.location;
-//     var marker = new google.maps.Marker({
-//         map: map,
-//         position: place.geometry.location
-//     });
-
-//     google.maps.event.addListener(marker, 'click', function () {
-//         infowindow.setContent(place.name);
-//         infowindow.open(map, this);
-//     });
-// }
-
-// function geocodeAddress(address) {
-//     deleteMarkers();
-//     console.log("Hi");
-//     geocoder.geocode({ 'address': address }, function (results, status) {
-
-//         if (status === 'OK') {
-//             map.setCenter(results[0].geometry.location);
-//             map.setZoom(12);
-//             var marker = new google.maps.Marker({
-//                 map: map,
-//                 position: results[0].geometry.location
-//             });
-//             marker.infowindow = new google.maps.InfoWindow({
-//                 content: address,
-//                 // map: map
-//             });
-//             //markers.push(marker);
-//             //locations.push(address);
-//             //  infowindow.open(map, marker);
-//             google.maps.event.addListener(marker, 'mouseover', function () {
-//                 this.infowindow.open(map, this);
-//             });
-//             google.maps.event.addListener(marker, 'mouseout', function () {
-//                 this.infowindow.close();
-//             });
-//             google.maps.event.addListener(marker, 'click', function () {
-//                 landmark = 1;
-//                 $("#panel").empty();
-//                 $("#infoPanel").empty();
-//                 $("#panel1").empty();
-//                 $('#progressBar').fadeIn("slow");
-//                 $("#contentTable tr").remove();
-//                 socket.emit('scrapeWiki', { address });
-//                 socket.emit('videos', { address });
-//                 socket.emit('scrapeBlogs', { address });
-//             });
-
-//         }
-
-//         //infowindowArray.push(infowindow);
-//         //myfunc();
-
-//         else if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
-//             setTimeout(function () {
-//                 geocodeAddress(address);
-//             }, 200);
-//         }
-//         else {
-//             alert('Geocode was not successful for the following reason: ' + status + data.location);
-//         }
-//     });
-// }
+}

@@ -1,4 +1,6 @@
-const apiKey = 'AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ';
+require('./config/config');
+
+const apiKey = process.env.GOOGLE_API_KEY;
 
 const path = require('path');
 const http = require('http');
@@ -23,32 +25,24 @@ var server = http.createServer(app);
 var io = socketIO(server);
 
 app.use(express.static(publicPath));
-//console.log(port);
 
 io.on(`connection`, socket => {
   console.log('new user connection');
 
   socket.on('landmarks-wiki', address => {
-    //console.log(address.address);
     landmarksWiki(address.address, function(json1) {
-      // let size = Object.keys(json1).length;
-      // console.log(size);
-      // console.log(json1);
       if (json1) socket.emit('returnWikiData', json1);
     });
   });
 
   socket.on('scrapeWiki', address => {
     scrapeWiki(address.address, function(json1) {
-      //let size = Object.keys(json1).length;
-      //console.log(size);
       if (json1) socket.emit('returnWikiData', json1);
     });
   });
 
   socket.on('videos', address => {
     scrapeVideos(address.address, function(result) {
-      //console.log(json1);
       socket.emit('videosData', result);
     });
   });
@@ -56,7 +50,6 @@ io.on(`connection`, socket => {
   socket.on('landmarks', address => {
     scrapeLandmarks(apiKey, address.address, function(jsonLandmark) {
       if (jsonLandmark) {
-        //console.log(jsonLandmark);
         socket.emit('landmark-data', { jsonLandmark });
       }
     });
@@ -70,7 +63,6 @@ io.on(`connection`, socket => {
 
   socket.on('myEvents', address => {
     myEvents(apiKey, address.address, function(json) {
-      //console.log(json);
       if (json) socket.emit('eventsData', json);
     });
   });
@@ -81,18 +73,9 @@ io.on(`connection`, socket => {
     });
   }
   socket.on('allEvents', address => {
-    //let eventsArray = [];
+    console.log('allevents emit');
     allEvents(apiKey, address.address, function(json) {
-      // if (eventsArray.length < 1 && json) {
-      //   eventsArray.push(json);
-      // }
-      // if (json && !checkIfNameExists(eventsArray, json.name)) {
-      //   eventsArray.push(json);
-      // }
-
-      // if (myEvents.length > 0) console.log(eventsArray);
       if (json) {
-        // console.log(json);
         socket.emit('allEventsData', json);
       }
     });
@@ -100,19 +83,10 @@ io.on(`connection`, socket => {
 
   socket.on('meetup', address => {
     scrapeMeetup(apiKey, address.address, function(json) {
-      //console.log(json);
       if (json) socket.emit('meetupData', json);
     });
   });
 });
-// app.get('/youtube/:id', (request, response) => {
-//     var id = request.params.id;
-//     //console.log(id);
-//     response.render('youtube.hbs', {   //render checks for templates you have made, in this case about.hbs and home.hbs
-//         src: id,
-//         //currentYear: new Date().getFullYear(),
-//     });
-// });
 
 server.listen(port, () => {
   console.log(`Server listening on port ${port}`);

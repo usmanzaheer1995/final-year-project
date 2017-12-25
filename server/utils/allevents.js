@@ -64,7 +64,6 @@ var allEvents = (apiKey, address, callback) => {
         apiKey: `${apiKey}`, // for Mapquest, OpenCage, Google Premier
         formatter: null // 'gpx', 'string', ...
       };
-      //console.log(apiKey);
       var geocoder = NodeGeocoder(options);
 
       geocoder
@@ -82,7 +81,6 @@ var allEvents = (apiKey, address, callback) => {
           }
         })
         .then(() => {
-          //console.log(json);
           callback(json);
         })
         .catch(function(err) {

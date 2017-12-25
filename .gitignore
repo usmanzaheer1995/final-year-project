@@ -1,3 +1,4 @@
 node_modules/
 playground/
 api_keys.txt
+server/config/config.json

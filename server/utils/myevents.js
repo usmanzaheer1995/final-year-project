@@ -43,9 +43,6 @@ var myEvents = (apiKey, address, callback) => {
         .find('.listing-container-block-title')
         .children('a')
         .text();
-      //console.log(name);
-      // console.log(json[eventName]);
-      //var location = ($(this).find('.listing-container-block-title .listing-container-tagline').clone().children().remove().end().text().replace(/\s+/g, ' ')));
       var location = $(this)
         .find('.listing-container-block-title .listing-container-tagline')
         .clone()
@@ -54,7 +51,6 @@ var myEvents = (apiKey, address, callback) => {
         .end()
         .text()
         .replace(/\s+/g, ' ');
-      //console.log(location);
       var time =
         $(this)
           .find('.listing-container-rating')
@@ -65,35 +61,6 @@ var myEvents = (apiKey, address, callback) => {
         .find('.listing-container-block-title')
         .children('a')
         .attr('href');
-
-      // --------------------AXIOS----------------------------- //
-
-      // let abc = encodeURI(location)
-      // let geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${abc}`;
-      // axios.get(geocodeUrl).then((response) => {
-      //     if (response.data.status == 'ZERO_RESULTS') {
-      //         throw new Error('Unable to find that address.');    // move to catch block
-      //     }
-
-      //     if (response.data.results.length > 0 && response.statusCode !== 400) {
-      //         var latitude = response.data.results[0].geometry.location.lat;
-      //         var longitude = response.data.results[0].geometry.location.lng;
-
-      //         // console.log(geocodeUrl);
-      //         // console.log(longitude, latitude);
-      //         json[eventLocation] = location;
-      //         //json[eventLocation].push(location);
-      //         json[eventName] = name;
-      //         //json[eventName].push(name);
-      //         json[eventTime] = time;
-      //         json[eventDetails] = details;
-      //         json[eventLatLng] = { lat: latitude, lng: longitude };
-      //         detailsArray.push(json[eventDetails]);
-      //     }
-      // });
-      // --------------------END OF AXIOS----------------------------- //
-
-      // --------------------NODE-GEOCODER---------------------------- //
 
       var options = {
         provider: 'google',
@@ -110,9 +77,7 @@ var myEvents = (apiKey, address, callback) => {
         .then(function(res) {
           if (res[0]) {
             json[eventLocation] = location;
-            //json[eventLocation].push(location);
             json[eventName] = name;
-            //json[eventName].push(name);
             json[eventTime] = time;
             json[eventDetails] = details;
 
@@ -121,26 +86,11 @@ var myEvents = (apiKey, address, callback) => {
             json[eventLatLng] = { lat: lat, lng: lng };
 
             detailsArray.push(json[eventDetails]);
-            // console.log(json[eventName]);
-            // console.log("--------------")
           }
-        }) //.then(() => {
-        //     //let i = 0;
-
-        //     request(json[eventDetails], function (error, response, html) {
-        //         if (!error && response.statusCode == 200) {
-        //             var $ = cheerio.load(html);
-        //             console.log(json[eventDetails]);
-        //             console.log($('.item-block-content').find('p').eq(1).text());
-        //         }
-        //     });
-        /*})*/
-        // --------------------END OFNODE-GEOCODER---------------------------- //
+        })
 
         .then(() => {
-          //console.log(json);
           callback(json);
-          // console.log(name + " emitted");
         })
         .catch(function(err) {
           console.log(err);

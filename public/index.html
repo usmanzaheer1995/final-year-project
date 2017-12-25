@@ -2,10 +2,6 @@
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
-        crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js" integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
-        crossorigin=""></script>
     <script src="https://www.webglearth.com/v2/api.js"></script>
 
     <title>Interative Atlas</title>
@@ -24,53 +20,9 @@
   -->
     <link rel="stylesheet" href="css/skin-blue.min.css">
 
-
-
 </head>
 
 <body onload="initialize()">
-
-
-
-    <!--<div id="infoButton" type="button"><b>Information</b></div>
-    <div id="infoPanel">
-        <ul id="inames-list">
-
-        </ul>
-    </div>
-
-    <div id="floating-panel">
-        <select id="select1">
-            <option value="islamabad">Islamabad</option>
-            <option value="lahore">Lahore</option>
-            <option value="karachi">Karachi</option>
-        </select>
-        <input id="submit" type="button" value="Locate">
-        <input id="my-events" type="button" value="my-events">
-    </div>
-
-
-    <div id="accordion" type="button"><b>Videos</b></div>
-    <div id="panel">
-        <ul id="videos-names-list">
-
-        </ul>
-    </div>
-
-    <div id="accordion1" type="button"><b>Articles/Blogs</b></div>
-    <div id="panel1">
-        <ul id="blogs-list">
-
-        </ul>
-    </div>-->
-
-    <!--<button class="accordion2">Section 3</button>
-    <div class="panel2">
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna
-            aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-    </div>-->
-
-    <!--.......................................NEW STUFF.......................................-->
 
     <body class="hold-transition skin-blue sidebar-mini">
 
@@ -141,14 +93,8 @@
                                 <i class="fa fa-angle-left pull-right"></i>
                             </span>
                         </a>
-                        <!--<ul id="infoPanel" class="treeview-menu">
-
-                    
-                        </ul>-->
 
                         <table id="contentTable" class="treeview-menu">
-                            <!--<col width="20px" />
-                            <col width="60px" />-->
                             <tr>
                                 <td></td>
                                 <td></td>
@@ -215,20 +161,15 @@
         <div id="map"></div>
         <!--.........................................................................-->
 
-        <!--<div id="map"></div>-->
         <script src="js/libs/jquery-2.2.3.min.js"></script>
-        <!-- Bootstrap 3.3.6 -->
         <script src="js/libs/bootstrap.min.js"></script>
-        <!-- AdminLTE App -->
         <script src="js/libs/app.min.js"></script>
         <script src="/socket.io/socket.io.js"></script>
-        <script src="js/libs/moment.js"></script>
-        <!--<script src="js/libs/jquery-3.2.0.min.js"></script>-->
         <script src="js/index.js"></script>
 
         <!-- <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ&callback=initMap"></script> -->
-        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ&libraries=places" async
-            defer></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhYlzJrh5hdjCLLIg3-OWnsrccBziPfDQ&libraries=geometry,places"
+            async defer></script>
         <script src="https://apis.google.com/js/api.js" type="text/javascript"></script>
     </body>
 
